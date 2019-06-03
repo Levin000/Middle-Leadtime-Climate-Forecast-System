@@ -1,9 +1,5 @@
-# PseasoonFseasoon
+# 月降雨量可预报性研究（基于月的预报因子）
 
-## This projection aim to evalumate the predictability of seasoon precipitaiton of stations in GHCN v2 database.
+**预报量** : **月降雨量** (来自于GHCN v2数据库的月降雨量观测记录).
 
-The ***predictand*** is **monthly precipitation** of stations in GHCN v2 database.
-
-The ***predictor*** include **monthly precipitation** of stations in GHCN v2 database and **monthly temperature** of stations in GHCN v3 database.
-
-This is **nightly** branch
+**预报因子** : **月降雨量** (来自于GHCN v2数据库的月降雨量观测记录)； **月平均温度** (来自于GHCN v3数据库的月平均温度观测记录).
