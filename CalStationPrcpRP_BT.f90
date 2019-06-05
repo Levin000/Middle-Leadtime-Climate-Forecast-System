@@ -72,7 +72,7 @@ SUBROUTINE CalStationPrcpRP_BT(StartRate,EndRate)
       INTEGER(KIND = 8), ALLOCATABLE :: IntegerArrayTemp2D(:,:)         ! 2D整型变量临时存储
       INTEGER(KIND = 8), ALLOCATABLE :: ValidStationCoupled(:,:)      !通过限制条件的站点，及通过情况，1通过，0不通过
       REAL(KIND = 8) :: DataNumNotEnough = -9.0    !,R_Inf = -5.0, P_Inf = -6.0 ,tg
-      REAL(KIND = 8) :: tavgLeftLimit,tavgRightLimit,prcp_anomaly_value,tavg_anomaly_value
+      REAL(KIND = 8) :: tavgLeftLimit,tavgRightLimit,prcp_anomaly_missing,prcp_anomaly_trace,tavg_anomaly_missing
       REAL(KIND = 8), ALLOCATABLE :: StudyPrcp(:),TempStudyPrcp(:),TempMonthStudyPrcp(:)     !研究区站点的降水数据
       REAL(KIND = 8), ALLOCATABLE :: FactorTavg(:),TempFactorTavg(:),TempMonthFactorTavg(:)  !预报因子站点的降水数据
       REAL(KIND = 8), ALLOCATABLE :: StationCodesUnique(:)                                   !GhcnTavg中Codes编号
@@ -86,7 +86,9 @@ SUBROUTINE CalStationPrcpRP_BT(StartRate,EndRate)
       REAL :: maxR2
       TYPE( CLS_CMD_Progress ) :: Progress                  !Commands line process bar
       LOGICAL(4) :: istatus_dir_mk,alive                                !文件存在状态
-      NAMELIST /CSPRPBT/ prcp_anomaly_value,tavg_anomaly_value,times,GhcnTavgColNum,MissVal,TraceVal,AheadMonthNum,StartMonth,StartYear,EndYear,MonthNum,ClimateStatus,RankNum,PPvalue,TrainingRate,CoverYears
+      NAMELIST /CSPRPBT/ prcp_anomaly_missing,prcp_anomaly_trace,tavg_anomaly_missing,&
+                         times,GhcnTavgColNum,MissVal,TraceVal,AheadMonthNum,StartMonth,&
+                         StartYear,EndYear,MonthNum,ClimateStatus,RankNum,PPvalue,TrainingRate,CoverYears
       !****************************************************************************
       ! !                        Formatting
       !****************************************************************************
@@ -468,11 +470,11 @@ SUBROUTINE CalStationPrcpRP_BT(StartRate,EndRate)
       PRINT *,analysisStationNum
 
       ! 为了将异常值排除在外，计算可预报性时我们将所有的降水异常值置为-9996，温度的异常值置为-9996
-      WHERE (GhcnPrcpStandardDB < 0)
-        GhcnPrcpStandardDB = -9996
+      WHERE (GhcnPrcpStandardDB == -9998)
+        GhcnPrcpStandardDB = -9999
       END WHERE
-      WHERE (GhcnTavgStandardDB == -9999 .OR. GhcnTavgStandardDB == -9998)
-        GhcnTavgStandardDB = -9996
+      WHERE (GhcnTavgStandardDB == -9998)
+        GhcnTavgStandardDB = -9999
       END WHERE
       
       DO i = StartStationNum,EndStationNum
@@ -499,7 +501,9 @@ SUBROUTINE CalStationPrcpRP_BT(StartRate,EndRate)
               TempMonthFactorTavg = TempFactorTavg(ii:(FactorTavgLen - k):MonthNum)
               TempMonthStudyPrcp = TempStudyPrcp(ii:(FactorTavgLen - k):MonthNum)
               
-              if((isContinuityGT_M(TempMonthStudyPrcp,ClimateStatus,prcp_anomaly_value) .EQ. .false.) .and. (isContinuityGT_M(TempMonthFactorTavg,ClimateStatus,tavg_anomaly_value) .EQ. .false.)) then
+              if((isContinuityGT_M(TempMonthStudyPrcp,ClimateStatus,prcp_anomaly_missing) .EQ. .false.) .and.&
+                 (isContinuityGT_M(TempMonthStudyPrcp,ClimateStatus,prcp_anomaly_trace) .EQ. .false.) .and.&
+                 (isContinuityGT_M(TempMonthFactorTavg,ClimateStatus,tavg_anomaly_missing) .EQ. .false.)) then
                 tempCount = COUNT(TempMonthFactorTavg>-9998.AND.TempMonthStudyPrcp>=0)
                 ALLOCATE(CodesIndexLocation(tempCount))
                 tempNum = 0

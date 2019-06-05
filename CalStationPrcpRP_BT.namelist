@@ -1,7 +1,8 @@
 &CSPRPBT
 
- prcp_anomaly_value   =    -9996,
- tavg_anomaly_value   =    -9996,
+ prcp_anomaly_missing =    -9999,
+ prcp_anomaly_trace   =    -8888,
+ tavg_anomaly_missing =    -9999,
  times                =        3,     ! μ +/- times*σ, 异常值右边界
  GhcnTavgColNum       =       14,     !GHCNTavgÊý¾ÝÁÐÊý
  MissVal              =        0,     !È±Ê¡Öµ´¦Àí£¨1Îª´¦Àí£¬0Îª²»´¦Àí£©
