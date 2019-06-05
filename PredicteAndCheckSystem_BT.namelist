@@ -1,0 +1,15 @@
+&PACSBT
+ prcp_anomaly_value     =      -9996,
+ tavg_anomaly_value     =      -9996,
+ GhcnPrcpColNum         =         15,     !GHCNPrcp数据列数
+ StartMonth             =          1,
+ MonthNum               =         12,
+ RankNum                =         15,
+ StartYear              =       1901,
+ EndYear                =       2010,
+ ClimateStatus          =         20,   !ClimateStatus气候态的年数
+ MissVal                =          0,   !缺省值处理（1为处理，0为不处理）
+ TraceVal               =          0,   !痕迹降水的处理（1为处理，0为不处理）
+ TrainingRate           =        0.6
+ 
+/
