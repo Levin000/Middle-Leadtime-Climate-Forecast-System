@@ -1,0 +1,20 @@
+&CSPRPBP
+
+  prcp_anomaly_value      =  -9996,
+  prcp
+  times                     =      3, ! μ + times*σ, 异常值右边界
+  GhcnPrcpColNum            =     15,
+  MissVal                   =      0,
+  TraceVal                  =      0,
+  AheadMonthNum             =     24,
+  StartMonth                =      1,
+  StartYear                 =   1901,
+  EndYear                   =   2010,
+  MonthNum                  =     12,
+  ClimateStatus             =     10,
+  RankNum                   =     15,
+  PPvalue                   =   0.05, !此参数无效，因为结果会保存P<=0.001，0.005，0.1三种结果
+  TrainingRate              =    1,
+  CoverYears                =     50
+
+/
