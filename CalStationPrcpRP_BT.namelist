@@ -1,0 +1,20 @@
+&CSPRPBT
+
+ prcp_anomaly_value   =    -9996,
+ tavg_anomaly_value   =    -9996,
+ times                =        3,     ! μ +/- times*σ, 异常值右边界
+ GhcnTavgColNum       =       14,     !GHCNTavgÊý¾ÝÁÐÊý
+ MissVal              =        0,     !È±Ê¡Öµ´¦Àí£¨1Îª´¦Àí£¬0Îª²»´¦Àí£©
+ TraceVal             =        0,     !ºÛ¼£½µË®µÄ´¦Àí£¨1Îª´¦Àí£¬0Îª²»´¦Àí£©
+ AheadMonthNum        =       24,     !×î´óÌáÇ°Ô¤±¨µÄÔÂ·ÝÊý
+ StartMonth           =        1,     !½µÓêÊý¾Ý¼ÇÂ¼£¨GhcnPrcp£©¿ªÊ¼µÄÔÂ·Ý
+ StartYear            =     1901,
+ EndYear              =     2010,
+ MonthNum             =       12,     !Ò»ÄêµÄÔÂ·ÝÊý
+ ClimateStatus        =       10,
+ RankNum              =       15,     !Õ¾µãÓÐÐ§ÅÅÃû
+ PPvalue              =     0.05,     ! ´Ë²ÎÊýÎÞÐ§£¬ÒòÎª½á¹û»á±£´æP<=0.001£¬0.005£¬0.1ÈýÖÖ½á¹û
+ TrainingRate         =        1,
+ CoverYears           =       50
+
+/
