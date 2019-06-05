@@ -379,9 +379,9 @@ SUBROUTINE PredicteAndCheckSystem_BP
         CLOSE(fid)
       END IF
       ! 为了将异常值排除在外，计算可预报性时我们将所有的异常值置为-9996
-      WHERE (GhcnPrcpStandardDB < 0)
-        GhcnPrcpStandardDB = -9996
-      END WHERE
+      !WHERE (GhcnPrcpStandardDB < 0)
+      !  GhcnPrcpStandardDB = -9996
+      !END WHERE
       !istatus = getcwd(Path)
       !PRINT *,TRIM(Path)
       !PAUSE

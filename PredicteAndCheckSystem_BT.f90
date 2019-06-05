@@ -48,7 +48,7 @@ SUBROUTINE PredicteAndCheckSystem_BT
       REAL(KIND = 8),ALLOCATABLE :: P_EQ_1_Codes(:)
       REAL(KIND = 8),ALLOCATABLE :: StudyStations_Month_Predictable(:,:)
       REAL(KIND = 8),ALLOCATABLE :: tempArray(:),tempPR001(:,:)
-      REAL(KIND = 8) :: keyValue = -9,TrainingRate,prcp_anomaly_value,tavg_anomaly_value
+      REAL(KIND = 8) :: keyValue = -9,TrainingRate
       REAL(KIND = 8),ALLOCATABLE :: tempPR(:,:)
       REAL(KIND = 8), ALLOCATABLE :: FactorPrcp(:),StudyPrcp(:)
       REAL(KIND = 8), ALLOCATABLE :: tempFactorPrcp(:),tempStudyPrcp(:)
@@ -60,7 +60,7 @@ SUBROUTINE PredicteAndCheckSystem_BT
       TYPE( CLS_CMD_Progress ) ::Progress                                          !进度条
       LOGICAL :: lstatus,lrelase,llstatus
       LOGICAL :: alive001,alive005,alive01,alive
-      NAMELIST /PACSBT/ prcp_anomaly_value,tavg_anomaly_value,GhcnPrcpColNum,StartMonth,MonthNum,RankNum,StartYear,EndYear,ClimateStatus,MissVal,TraceVal,TrainingRate
+      NAMELIST /PACSBT/ GhcnPrcpColNum,StartMonth,MonthNum,RankNum,StartYear,EndYear,ClimateStatus,MissVal,TraceVal,TrainingRate
     
 100   FORMAT(a60:,i)  
 200   FORMAT(f15.0,f10.0,3f6.2)
@@ -413,9 +413,9 @@ SUBROUTINE PredicteAndCheckSystem_BT
         DEALLOCATE(RealArrayTemp2D)
       END IF
       ! 为了将异常值排除在外，计算可预报性时我们将所有的温度的异常值置为-9999，isContinuityGT_M函数要求
-      WHERE (GhcnTavgStandardDB == -9999 .OR. GhcnTavgStandardDB == -9998)
-        GhcnPrcpStandardDB = -9996
-      END WHERE
+      !WHERE (GhcnTavgStandardDB == -9999 .OR. GhcnTavgStandardDB == -9998)
+      !  GhcnPrcpStandardDB = -9996
+      !END WHERE
       !*************************************************************************************************************************
       ALLOCATE(R(MonthNum*RankNum*StudyStationNum001))
       ALLOCATE(P(MonthNum*RankNum*StudyStationNum001))
@@ -510,8 +510,8 @@ SUBROUTINE PredicteAndCheckSystem_BT
               !==============================================================================================
               !               判断是否有连续20年的数据无变化存在连续的20年数据无变化时舍弃，
               !==============================================================================================
-              IF((isContinuityGT_M(tempFactorTavgMonth(ValidStationLocation),ClimateStatus,tavg_anomaly_value) .EQ. .false.).AND.&
-                 (isContinuityGT_M(tempStudyPrcpMonth(ValidStationLocation),ClimateStatus,prcp_anomaly_value) .EQ. .false.)) THEN    !只计算当20年气候态内没有连续的无变化的值时的值
+              !IF((isContinuityGT_M(tempFactorTavgMonth(ValidStationLocation),ClimateStatus,tavg_anomaly_value) .EQ. .false.).AND.&
+              !   (isContinuityGT_M(tempStudyPrcpMonth(ValidStationLocation),ClimateStatus,prcp_anomaly_value) .EQ. .false.)) THEN    !只计算当20年气候态内没有连续的无变化的值时的值
                 !===========================================================
                 !           K-flod CrossCheck
                 !===========================================================
@@ -604,12 +604,12 @@ SUBROUTINE PredicteAndCheckSystem_BT
                 DEALLOCATE(tempPredictedPrcpCP)
                 DEALLOCATE(tempKFPredictedPrcp)
                 DEALLOCATE(tempKFPredictedPrcpCP)
-              ELSE
-                R(tempLength) = Trash
-                P(tempLength) = Trash
-                KFR(tempLength) = Trash
-                KFP(tempLength) = Trash
-              END IF
+              !ELSE
+              !  R(tempLength) = Trash
+              !  P(tempLength) = Trash
+              !  KFR(tempLength) = Trash
+              !  KFP(tempLength) = Trash
+              !END IF
               DEALLOCATE(tempFactorTavgMonth)
               DEALLOCATE(tempStudyPrcpMonth)
             END IF
