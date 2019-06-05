@@ -1,5 +1,4 @@
 &PACSBP
- prcp_anomaly_value     =      -9996,
  GhcnPrcpColNum         =         15,  !GHCNPrcp数据列数
  StartMonth             =          1,
  MonthNum               =         12,
