@@ -1,6 +1,7 @@
 &CSPRPBP
 
-  prcp_anomaly_value      =  -9996,
+  prcp_anomaly_missing      =  -9999,
+  prcp_anomaly_trace        =  -8888,
   prcp
   times                     =      3, ! μ + times*σ, 异常值右边界
   GhcnPrcpColNum            =     15,
