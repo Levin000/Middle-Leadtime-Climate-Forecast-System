@@ -56,7 +56,6 @@ Program mainProgram
       print *,' '
       print *,'The basic data used in this model from GHCN V2 stations precipitati'
       print *,'on data and V3 stations temperature data.'
-      print *,' '
       print *,'###################################################################'
       print *,'NOTES: If you are a new user, please read important information above'
       print *,'NOTES: If you are a new user, please read important information above'
@@ -89,9 +88,9 @@ Program mainProgram
           print *,'>> CalStationPrcpRP_BT      yes/no?'
         case(5)
           print *,'>> PredicteAndCheckSystem_BT      yes/no?'
-        CASE(6)
+        case(6)
           print *,'>> PredictLastOneData_BT      yes/no?'
-          case default
+        case default
           print *,'>> Incorrect Module Code!'
         end select
         print *,' '
