@@ -79,7 +79,7 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
       REAL :: StartRate,EndRate
       REAL :: PPvalue                     !显著性水平
       REAL :: TrainingRate                !训练数据占总数据的比例
-      REAL :: maxR2
+      REAL :: maxR2, minR2,avgR2
       TYPE( CLS_CMD_Progress ) ::Progress  !进度条
       LOGICAL(4) :: istatus_dir_mk,alive                              !文件存在状态
       NAMELIST /CSPRPBP/ prcp_anomaly_missing,prcp_anomaly_trace,times,GhcnPrcpColNum,MissVal,&
@@ -577,6 +577,29 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
           END DO
         END DO
         CLOSE(fileID)
+        
+        ! 保存最差R2,P<0.1
+        PPvalue = 0.1
+        TempR = R**2
+        !TempP = P
+        WHERE(P >= PPvalue)   !删除显著水平低于0.1的值
+          TempR = 9
+        END WHERE
+        
+        WHERE(P == DataNumNotEnough)   !R .EQ. NaN
+          TempR = 9
+        END WHERE
+        
+        OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.1_minimum.dat',IOSTAT = iosval)
+        DO ii = 1,MonthNum
+          minR2 = MINVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+          CodesIndexLocation = MINLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+          WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),minR2,&
+            R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
+            P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
+        END DO
+        CLOSE(fileID)
+        
         ! 保存前15名,P<0.05
         PPvalue = 0.05
         TempR = R**2
@@ -604,6 +627,27 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
               TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
             END IF
           END DO
+        END DO
+        CLOSE(fileID)
+        ! 保存最差R2,P<0.05
+        PPvalue = 0.05
+        TempR = R**2
+        !TempP = P
+        WHERE(P >= PPvalue)   !删除显著水平低于0.1的值
+          TempR = 9
+        END WHERE
+        
+        WHERE(P == DataNumNotEnough)   !R .EQ. NaN
+          TempR = 9
+        END WHERE
+        
+        OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.05_minimum.dat',IOSTAT = iosval)
+        DO ii = 1,MonthNum
+          minR2 = MINVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+          CodesIndexLocation = MINLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+          WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),minR2,&
+            R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
+            P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
         END DO
         CLOSE(fileID)
 
@@ -636,6 +680,28 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
           END DO
         END DO
         CLOSE(fileID)
+        ! 保存最差R2,P<0.01
+        PPvalue = 0.01
+        TempR = R**2
+        !TempP = P
+        WHERE(P >= PPvalue)   !删除显著水平低于0.1的值
+          TempR = 9
+        END WHERE
+        
+        WHERE(P == DataNumNotEnough)   !R .EQ. NaN
+          TempR = 9
+        END WHERE
+        
+        OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.01_minimum.dat',IOSTAT = iosval)
+        DO ii = 1,MonthNum
+          minR2 = MINVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+          CodesIndexLocation = MINLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+          WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),minR2,&
+            R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
+            P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
+        END DO
+        CLOSE(fileID)
+        
         DEALLOCATE(CodesIndexLocation)
         istatus_dir_ch = CHDIR(TRIM(WorkSpace)//'StationList\')
         
