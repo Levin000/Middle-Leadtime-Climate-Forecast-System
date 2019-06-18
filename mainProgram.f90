@@ -56,6 +56,7 @@ Program mainProgram
       print *,' '
       print *,'The basic data used in this model from GHCN V2 stations precipitati'
       print *,'on data and V3 stations temperature data.'
+      print *,''
       print *,'###################################################################'
       print *,'NOTES: If you are a new user, please read important information above'
       print *,'NOTES: If you are a new user, please read important information above'
