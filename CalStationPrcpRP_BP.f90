@@ -62,6 +62,7 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
       INTEGER :: FactorPrcpLen                                        !预报因子StartYear->EndYear期间数据长度
       INTEGER :: i,j,k,ic,im,StartStationNum,EndStationNum,analysisStationNum
       INTEGER :: ClimateStatus
+      INTEGER :: R2CountTotal                                          !单站点单月份有效R2的总数量
       INTEGER(KIND = 8)  StudyCode
       INTEGER(KIND = 8), ALLOCATABLE :: CodesIndex(:)                 !提取出研究的站点编号
       INTEGER(KIND = 8), ALLOCATABLE :: CodesIndexLocation(:)         !存储某一个站点再数据库中的索引值(行位置)
@@ -75,11 +76,12 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
       REAL(KIND = 8), ALLOCATABLE :: StationCodesUnique(:)            !GhcnPrcp中Codes编号
       REAL(KIND = 8), ALLOCATABLE :: RealArrayTemp2D(:,:)             !读取GhcnPrcp站点数据的临时数据库
       REAL(KIND = 8), ALLOCATABLE :: GhcnPrcpStandardDB(:,:)          !GhcnPrcp存放格式标准化数据库
-      REAL, ALLOCATABLE :: P(:,:),R(:,:),TempR(:,:),TempP(:,:)        ! 预报每一个站点时，P\R信息
+      REAL, ALLOCATABLE :: P(:,:),R(:,:),TempR(:,:),TempP(:,:),R2Count(:,:)        ! 预报每一个站点时，P\R信息
       REAL :: StartRate,EndRate
       REAL :: PPvalue                     !显著性水平
       REAL :: TrainingRate                !训练数据占总数据的比例
       REAL :: maxR2, minR2,avgR2
+      REAL :: R2Total                                          !单站点单月份有效R2的总和
       TYPE( CLS_CMD_Progress ) ::Progress  !进度条
       LOGICAL(4) :: istatus_dir_mk,alive                              !文件存在状态
       NAMELIST /CSPRPBP/ prcp_anomaly_missing,prcp_anomaly_trace,times,GhcnPrcpColNum,MissVal,&
@@ -389,6 +391,7 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
       ALLOCATE(TempR(ValidStationNum*MonthNum,AheadMonthNum))
       ALLOCATE(P(ValidStationNum*MonthNum,AheadMonthNum))
       ALLOCATE(TempP(ValidStationNum*MonthNum,AheadMonthNum))
+      ALLOCATE(R2Count(ValidStationNum*MonthNum,AheadMonthNum))
       CALL Progress % Set( N = ValidStationNum , L = 30 )!// size(CodesIndex)次，显示长度30
       Progress % M = "#" !// 已完成部分的字符，不是必须
       Progress % O = " " !// 未完成部分的字符，不是必须
@@ -547,36 +550,36 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
         !close(fileID)
         
         ! 保存前15名,P<0.1
-        PPvalue = 0.1
-        TempR = R**2
-        !TempP = P
-        WHERE(P >= PPvalue)   !删除显著水平低于0.1的值
-          TempR = 0
-        END WHERE
-        
-        WHERE(P == DataNumNotEnough)   !R .EQ. NaN
-          TempR = DataNumNotEnough
-        END WHERE
-        !WHERE(TempR == R_Inf)   !R .EQ. Inf
+        !PPvalue = 0.1
+        !TempR = R**2
+        !!TempP = P
+        !WHERE(P >= PPvalue)   !删除显著水平低于0.1的值
         !  TempR = 0
         !END WHERE
-        !WHERE(TempP == P_Inf)   !R .EQ. Infinity
-        !  TempR = 0
+        !
+        !WHERE(P == DataNumNotEnough)   !R .EQ. NaN
+        !  TempR = DataNumNotEnough
         !END WHERE
-        OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.1.dat',IOSTAT = iosval)
-        DO ii = 1,MonthNum
-          DO jj = 1,RankNum
-            maxR2 = MAXVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-            CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-            WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),maxR2,&
-                  R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
-                  P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
-            IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
-              TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
-            END IF
-          END DO
-        END DO
-        CLOSE(fileID)
+        !!WHERE(TempR == R_Inf)   !R .EQ. Inf
+        !!  TempR = 0
+        !!END WHERE
+        !!WHERE(TempP == P_Inf)   !R .EQ. Infinity
+        !!  TempR = 0
+        !!END WHERE
+        !OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.1.dat',IOSTAT = iosval)
+        !DO ii = 1,MonthNum
+        !  DO jj = 1,RankNum
+        !    maxR2 = MAXVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+        !    CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+        !    WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),maxR2,&
+        !          R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
+        !          P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
+        !    IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
+        !      TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
+        !    END IF
+        !  END DO
+        !END DO
+        !CLOSE(fileID)
         
         ! 保存最差R2,P<0.1
         PPvalue = 0.1
@@ -594,41 +597,73 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
         DO ii = 1,MonthNum
           minR2 = MINVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
           CodesIndexLocation = MINLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-          WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),minR2,&
+          WRITE(fileID,'(I15,I10,3F8.4)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),minR2,&
             R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
             P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
         END DO
         CLOSE(fileID)
         
-        ! 保存前15名,P<0.05
-        PPvalue = 0.05
+        ! 保存平均R2,P<0.1
+        PPvalue = 0.1
         TempR = R**2
-        WHERE(P >= PPvalue)   !删除显著水平低于0.05的值
+        R2Count = 0
+        R2CountTotal = 0
+        R2Total = 0
+        !TempP = P
+        WHERE((P < PPvalue) .AND. (P /= DataNumNotEnough))   !R有效值计数
+          R2Count = 1
+        END WHERE
+        
+        WHERE((P >= PPvalue) .OR. (P == DataNumNotEnough))
           TempR = 0
         END WHERE
-        WHERE(P == DataNumNotEnough)   !R .EQ. NaN
-          TempR = DataNumNotEnough
-        END WHERE
-        !WHERE(TempR == R_Inf)   !
-        !  TempR = 0
-        !END WHERE
-        !WHERE(TempP == P_Inf)   !
-        !  TempR = 0
-        !END WHERE
-        OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.05.dat',IOSTAT = iosval)
+        
+        OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.1_averge.dat',IOSTAT = iosval)
         DO ii = 1,MonthNum
-          DO jj = 1,RankNum
-            maxR2 = MAXVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-            CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-            WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),maxR2,&
-                  R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
-                  P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
-            IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
-              TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
-            END IF
+          !统计相应月份的有效值的r2及有效r2的数量以便计算平均值
+          DO jj = 1+(ii-1)*ValidStationNum, ii*ValidStationNum
+            DO kk = 1,AheadMonthNum
+              IF (R2Count(jj,kk) > 0) THEN
+                R2CountTotal = R2CountTotal + 1
+                R2Total = R2Total + TempR(jj,kk)
+              END IF
+            END DO
           END DO
+          avgR2 = R2Total/R2CountTotal
+          
+          WRITE(fileID,'(I5,2F8.4)') ii, avgR2, 0.0
         END DO
         CLOSE(fileID)
+        
+        ! 保存前15名,P<0.05
+        !PPvalue = 0.05
+        !TempR = R**2
+        !WHERE(P >= PPvalue)   !删除显著水平低于0.05的值
+        !  TempR = 0
+        !END WHERE
+        !WHERE(P == DataNumNotEnough)   !R .EQ. NaN
+        !  TempR = DataNumNotEnough
+        !END WHERE
+        !!WHERE(TempR == R_Inf)   !
+        !!  TempR = 0
+        !!END WHERE
+        !!WHERE(TempP == P_Inf)   !
+        !!  TempR = 0
+        !!END WHERE
+        !OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.05.dat',IOSTAT = iosval)
+        !DO ii = 1,MonthNum
+        !  DO jj = 1,RankNum
+        !    maxR2 = MAXVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+        !    CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+        !    WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),maxR2,&
+        !          R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
+        !          P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
+        !    IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
+        !      TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
+        !    END IF
+        !  END DO
+        !END DO
+        !CLOSE(fileID)
         ! 保存最差R2,P<0.05
         PPvalue = 0.05
         TempR = R**2
@@ -645,41 +680,73 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
         DO ii = 1,MonthNum
           minR2 = MINVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
           CodesIndexLocation = MINLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-          WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),minR2,&
+          WRITE(fileID,'(I15,I10,3F8.4)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),minR2,&
             R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
             P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
         END DO
         CLOSE(fileID)
-
-        ! 保存前15名,P<0.01
-        PPvalue = 0.01
+        
+        ! 保存平均R2,P<0.05
+        PPvalue = 0.05
         TempR = R**2
-        WHERE(P >= PPvalue)   !删除显著水平低于0.05的值
+        R2Count = 0
+        R2CountTotal = 0
+        R2Total = 0
+        !TempP = P
+        WHERE((P < PPvalue) .AND. (P /= DataNumNotEnough))   !R有效值计数
+          R2Count = 1
+        END WHERE
+        
+        WHERE((P >= PPvalue) .OR. (P == DataNumNotEnough))
           TempR = 0
         END WHERE
-        WHERE(P == DataNumNotEnough)   !R .EQ. NaN
-          TempR = DataNumNotEnough
-        END WHERE
-        !WHERE(TempR == R_Inf)   !R .EQ. NaN
-        !  TempR = 0
-        !END WHERE
-        !WHERE(TempP == P_Inf)   !R .EQ. Infinity
-        !  TempR = 0
-        !END WHERE
-        OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.01.dat',IOSTAT = iosval)
+        
+        OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.05_averge.dat',IOSTAT = iosval)
         DO ii = 1,MonthNum
-          DO jj = 1,RankNum
-            maxR2 = MAXVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-            CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-            WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),maxR2,&
-                R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
-                P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
-            IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
-              TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
-            END IF
+          !统计相应月份的有效值的r2及有效r2的数量以便计算平均值
+          DO jj = 1+(ii-1)*ValidStationNum, ii*ValidStationNum
+            DO kk = 1,AheadMonthNum
+              IF (R2Count(jj,kk) > 0) THEN
+                R2CountTotal = R2CountTotal + 1
+                R2Total = R2Total + TempR(jj,kk)
+              END IF
+            END DO
           END DO
+          avgR2 = R2Total/R2CountTotal
+          
+          WRITE(fileID,'(I5,2F8.4)') ii, avgR2, 0.0
         END DO
         CLOSE(fileID)
+
+        ! 保存前15名,P<0.01
+        !PPvalue = 0.01
+        !TempR = R**2
+        !WHERE(P >= PPvalue)   !删除显著水平低于0.05的值
+        !  TempR = 0
+        !END WHERE
+        !WHERE(P == DataNumNotEnough)   !R .EQ. NaN
+        !  TempR = DataNumNotEnough
+        !END WHERE
+        !!WHERE(TempR == R_Inf)   !R .EQ. NaN
+        !!  TempR = 0
+        !!END WHERE
+        !!WHERE(TempP == P_Inf)   !R .EQ. Infinity
+        !!  TempR = 0
+        !!END WHERE
+        !OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.01.dat',IOSTAT = iosval)
+        !DO ii = 1,MonthNum
+        !  DO jj = 1,RankNum
+        !    maxR2 = MAXVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+        !    CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+        !    WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),maxR2,&
+        !        R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
+        !        P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
+        !    IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
+        !      TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
+        !    END IF
+        !  END DO
+        !END DO
+        !CLOSE(fileID)
         ! 保存最差R2,P<0.01
         PPvalue = 0.01
         TempR = R**2
@@ -696,9 +763,41 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
         DO ii = 1,MonthNum
           minR2 = MINVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
           CodesIndexLocation = MINLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-          WRITE(fileID,'(I15,I10,3F6.2)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),minR2,&
+          WRITE(fileID,'(I15,I10,3F8.4)') CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),minR2,&
             R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
             P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
+        END DO
+        CLOSE(fileID)
+        
+        ! 保存平均R2,P<0.01
+        PPvalue = 0.01
+        TempR = R**2
+        R2Count = 0
+        R2CountTotal = 0
+        R2Total = 0
+        !TempP = P
+        WHERE((P < PPvalue) .AND. (P /= DataNumNotEnough))   !R有效值计数
+          R2Count = 1
+        END WHERE
+        
+        WHERE((P >= PPvalue) .OR. (P == DataNumNotEnough))
+          TempR = 0
+        END WHERE
+        
+        OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.01_averge.dat',IOSTAT = iosval)
+        DO ii = 1,MonthNum
+          !统计相应月份的有效值的r2及有效r2的数量以便计算平均值
+          DO jj = 1+(ii-1)*ValidStationNum, ii*ValidStationNum
+            DO kk = 1,AheadMonthNum
+              IF (R2Count(jj,kk) > 0) THEN
+                R2CountTotal = R2CountTotal + 1
+                R2Total = R2Total + TempR(jj,kk)
+              END IF
+            END DO
+          END DO
+          avgR2 = R2Total/R2CountTotal
+          
+          WRITE(fileID,'(I5,2F8.4)') ii, avgR2, 0.0
         END DO
         CLOSE(fileID)
         
