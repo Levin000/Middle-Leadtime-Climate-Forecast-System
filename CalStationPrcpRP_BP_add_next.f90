@@ -647,7 +647,7 @@
                 CALL LinearRegression(ptor1Prcp,ptandPrcp,trainLen,ptor1k,ptor1b)
                 ALLOCATE(ptandPrcpY1(trainLen))
                 ptandPrcpY1 = ptor1Prcp*ptor1k + ptor1b
-                CALL Correlation(trainLen,ptandPrcpY1,ptandPrcp,RptandY)
+                !CALL Correlation(trainLen,ptandPrcpY1,ptandPrcp,RptandY)
                 !print *,"k:",Rtandtor1,",  b:",RptandY
                 !pause
 
