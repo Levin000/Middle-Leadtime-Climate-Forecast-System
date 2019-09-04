@@ -49,14 +49,21 @@ Program mainProgram
       print *,'  rate is 0.6(as default). Couple number of valid data must >= 50(a'
       print *,'  s default).'
       print *,' '
-      print *,'6.Forecast and check the monthly precipitation use simple linear re'
+      print *,'6.Forecast and check the monthly precipitation use simple linear r-'
+      print *,'  egression methods base on precipitation data. In this model, we '
+      print *,'  we using another predictor station in this projecitons to reduce '
+      print *,'  residual by only one predictor station. "Another Station" is def-'
+      print *,'  ined as the "stationID" and "AheadMonth" not equal to the first '
+      print *,'  predictor.'
+      print *,' '
+      print *,'7.Forecast and check the monthly precipitation use simple linear re'
       print *,'  gression methods and K-fold cross check methods base on temperatu'
       print *,'  re  data.  Time from 1901 to 2010. Train rate in simple linear re'
       print *,'  gression is 0.6(as default). K-fold num in K-fold cross check is '
       print *,'  the length of valid couple data. Couple number of valid data must'
       print *,'  >= 50(as default).'
       print *,' '
-      print *,'7.Forecast and check the monthly precipitation Only use simple line'
+      print *,'8.Forecast and check the monthly precipitation Only use simple line'
       print *,'  ar regression methods base on temperature data. Time from 1901 '
       print *,'  to 2010. Train num is the length of valid couple data minus 1.(as'
       print *,'  default). Couple number of valid data must >= 50(as default).'
@@ -80,8 +87,9 @@ Program mainProgram
       print *,'3.PredicteAndCheckSystem_BP'
       print *,'4.PredictLastOneData_BP'
       print *,'5.CalStationPrcpRP_BT'
-      print *,'6.PredicteAndCheckSystem_BT'
-      print *,'7.PredictLastOneData_BT'
+      print *,'6.CalStationPrcpRP_BT_add_next'
+      print *,'7.PredicteAndCheckSystem_BT'
+      print *,'8.PredictLastOneData_BT'
       
 
       read (*,*),PressKey
@@ -99,8 +107,10 @@ Program mainProgram
         case(5)
           print *,'>> CalStationPrcpRP_BT      yes/no?'
         case(6)
-          print *,'>> PredicteAndCheckSystem_BT      yes/no?'
+          print *,'>> CalStationPrcpRP_BT_add_next      yes/no?'
         case(7)
+          print *,'>> PredicteAndCheckSystem_BT      yes/no?'
+        case(8)
           print *,'>> PredictLastOneData_BT      yes/no?'
         case default
           print *,'>> Incorrect Module Code!'
@@ -117,8 +127,9 @@ Program mainProgram
           print *,'3.PredicteAndCheckSystem_BP'
           print *,'4.PredictLastOneData_BP'
           print *,'5.CalStationPrcpRP_BT'
-          print *,'6.PredicteAndCheckSystem_BT'
-          print *,'7.PredictLastOneData_BT'
+          print *,'6.CalStationPrcpRP_BT_add_next'
+          print *,'7.PredicteAndCheckSystem_BT'
+          print *,'8.PredictLastOneData_BT'
           read (*,*),PressKey
         end if
       end do
@@ -234,10 +245,44 @@ Program mainProgram
         call CalStationPrcpRP_BT(StartRate,EndRate)
         pause
       case(6)
+        !Base On Precipitation
+        print *,' '
+        print *,'Default StartRate = 0.0\EndRate = 1.0, if need please modify those value.'
+        print *,' '
+        print *,'yes/no?'
+        print *,' '
+        read (*,*),ConfirmStr
+        if(trim(ConfirmStr)=='yes') then
+          do while(trim(ConfirmStr)=='yes')
+            print *,' '
+886         print *,'Please input StartRate(as format 0.x,StartRate should >= 0.0 and less than 1.0):'
+            print *,' '
+            read (*,*) StartRate
+            print *,' '
+            print *,'Please input EndRate(as format 0.x,EndRate should great than 0.0 and <= 1.0):'
+            print *,' '
+            read (*,*) EndRate
+            print *,' '
+            print *,'Modified StartRate is',StartRate,'EndRate is',EndRate
+            print *,' '
+            print *,'yes/no?'
+            print *,' '
+            read (*,*),ConfirmStr
+            print *,'  '
+            if(trim(ConfirmStr)=='yes') then
+              exit
+            else if(trim(ConfirmStr)=='no') then
+              goto 886
+            end if
+          end do
+        end if
+        call CalStationPrcpRP_BT_add_next(StartRate,EndRate)
+        pause
+      case(7)
         !Base On Temperature
         call PredicteAndCheckSystem_BT()
         pause
-      case(7)
+      case(8)
         !Base On Temperature
         call PredictLastOneData_BT()
         pause
