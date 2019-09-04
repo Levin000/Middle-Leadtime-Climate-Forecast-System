@@ -51,7 +51,7 @@ SUBROUTINE PredicteAndCheckSystem_BP
       REAL(KIND = 8), ALLOCATABLE :: FactorPrcp(:),StudyPrcp(:)
       REAL(KIND = 8), ALLOCATABLE :: tempFactorPrcp(:),tempStudyPrcp(:)
       REAL(KIND = 8),ALLOCATABLE :: tempPredictedPrcp(:),tempPredictedPrcpCP(:),tempKFPredictedPrcp(:),tempKFPredictedPrcpCp(:),X_Value
-      REAL(KIND = 8) Pc,Pm,Fc,Fm
+      REAL(KIND = 8) :: Pc,Pm,Fc,Fm
       REAL,ALLOCATABLE :: R(:),P(:),KFR(:),KFP(:)
       REAL(KIND = 8), ALLOCATABLE :: Pk(:),Pb(:)
       REAL(KIND = 8), ALLOCATABLE :: GhcnPrcpStandardDB(:,:),RealArrayTemp2D(:,:)  !GhcnPrcp存放格式标准化数据库
