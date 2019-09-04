@@ -142,7 +142,7 @@ MODULE statisticPort
       !****************************************************************************
       !
       !  SUBROUTINE: LinearRegression
-      !  PURPOSE:  gain the parameters of simple linear regression
+      !  PURPOSE:  calculate the parameters of simple linear regression
       !  x is independent variable
       !  y is dependent variable
       !  n is the number of array x
@@ -166,6 +166,7 @@ MODULE statisticPort
           Lxy = Lxy + x(i)*y(i)
         END DO
         Lxy = Lxy -n*Xmean*Ymean
+        
         DO i = 1,n
           Lxx = Lxx + x(i)*x(i)
         END DO
@@ -180,6 +181,113 @@ MODULE statisticPort
         b = Ymean - k*Xmean
 
       END SUBROUTINE LinearRegression
+      
+      SUBROUTINE LinearRegressionNew(x,y,n,k,b)  ! iii
+        IMPLICIT NONE
+        INTEGER :: n
+        INTEGER :: i,j!,iii
+        REAL(KIND = 8) :: x(n),y(n)
+        REAL(KIND = 8) :: k,b
+        REAL(KIND = 8) :: Xmean,Ymean,Lxy,Lxx,Q
+
+        Lxy = 0.
+        Lxx = 0.
+        Xmean = SUM(x)/n
+        Ymean = SUM(y)/n
+        DO i = 1,n
+          Q = x(i) - Xmean
+          Lxx = Lxx + Q * Q
+          Lxy = Lxy + Q * (y(i) - Ymean)
+        END DO
+        !IF(Lxx == 0) THEN !================================================
+        !    print *,'========',iii
+        !    print *,'x:', x
+        !    print *,'y:', y
+        !    PAUSE
+        !END IF!================================================
+        k = Lxy/Lxx
+        b = Ymean - k*Xmean
+
+      END SUBROUTINE LinearRegressionNew
+      
+      !****************************************************************************
+      !
+      !  FUNCTION:  parCorrelation(r12,r13,r23,r12p3)
+      !
+      !  PURPOSE:   Calculate sample linear partial correlation coefficients between V1 and V2, controlling by V3,
+      !             ry2 is the sample linear correlation coefficients between V1 and V2.
+      !             ry1 is the sample linear correlation coefficients between V1 and V3.
+      !             r12 is the sample linear correlation coefficients between V2 and V3.
+      !             ry2c1 sample linear partial correlation coefficients between V1 and V2, controlling by V3.
+      !             By PHD WANG Leibin, Augest 26,2019
+      !****************************************************************************
+      SUBROUTINE parCorrelation(ry2,ry1,r12,ry2c1)
+        IMPLICIT NONE
+        REAL :: ry1, ry2, r12
+        REAL :: ry2c1
+        
+        IF(ry1 == 1) THEN
+          PAUSE 'bad argument ry1 in parCorrelation'
+        ELSEIF(ry2 == 1) THEN
+          PAUSE 'bad argument ry2 in parCorrelation'
+        ELSEIF(r12 == 1) THEN
+          PAUSE 'bad argument r12 in parCorrelation'
+        ENDIF
+        
+        ry2c1 = (ry2 - ry1*r12)/SQRT((1-ry1**2)*(1-r12**2))
+        
+      END SUBROUTINE parCorrelation
+      
+      !****************************************************************************
+      !
+      !  FUNCTION:      Pvalue(N, CN, R, P)
+      !
+      !  PURPOSE:       !!!! Note: 本程序为偏相关分析中，t-检验结果的p值.
+      !                 N， 样本数量
+      !                 CN， 控制变量的数量
+      !                 R， 变量之间的偏相关系数
+      !                 P， 偏相关中的p值
+      !                 By Dr WANG Leibin, March 27,2017
+      !****************************************************************************
+      SUBROUTINE parPvalue(N, CN, R, P)
+        !USE STATISTICPORT
+        IMPLICIT NONE
+        ! N is sample size. 
+        ! CN is controlling var number.
+        !R is pearson coefficient.sig=*/**/NAN,表显著/极显著/不显著。
+        ! t is T统计量。
+        !prob是t统计量在显著性水平为0.05/0.01时的临界值。prob<0.05/0.01时显著。
+        INTEGER :: N, CN
+        REAL :: df, df0_01, df0_05, b0_01, b0_05, R, P
+        REAL(KIND = 8) :: t, prob005, prob001   !,P_Inf = -6.0
+        CHARACTER(LEN = 3) :: sig
+        !REAL(KIND = 8),external :: betai
+        LOGICAL(4) :: istatus
+
+        df=N - CN -2    !N is sample size
+        t=(ABS(R)*SQRT(df))/SQRT(1-R**2)
+        df0_01 = 0.01*df
+        df0_05 = 0.5*df
+        b0_01 = 0.01
+        b0_05 = 0.5
+        prob001 = betai(df0_01,b0_01,df/(df+t**2))
+        prob005 = betai(df0_05,b0_05,df/(df+t**2))
+        IF(prob001<0.01) THEN
+          sig=CHAR(42)//CHAR(42)
+          P = prob001
+        ELSE IF(prob005<0.05) THEN
+          sig=CHAR(42)
+          P = prob005
+        ELSE IF(prob005>=0.05) THEN
+          sig=CHAR(78)//CHAR(65)//CHAR(78)
+          !IF(ABS(prob005)>=1) THEN
+          !  P = P_Inf
+          !ELSE
+          P = prob005
+          !END IF
+        END IF
+      END SUBROUTINE parPvalue
+      
       !****************************************************************************
       !
       !  FUNCTION:  correlation(n,x,y,r)
@@ -218,8 +326,8 @@ MODULE statisticPort
           r = sxy/(sx*sy)
         END IF
         RETURN
-
       END SUBROUTINE correlation
+      
       !****************************************************************************
       !
       !  FUNCTION:      meanvar(n,x,ax,sx,vx)
@@ -250,6 +358,7 @@ MODULE statisticPort
         RETURN
       END SUBROUTINE meanvar
       
+      
       !****************************************************************************
       !
       !  FUNCTION:      Pvalue(N,R,P)
@@ -271,7 +380,7 @@ MODULE statisticPort
         !REAL(KIND = 8),external :: betai
         LOGICAL(4) :: istatus
 
-        df=N-2    !30 is sample size
+        df=N-2    !N is sample size
         t=(ABS(R)*SQRT(df))/SQRT(1-R**2)
         df0_01 = 0.01*df
         df0_05 = 0.5*df
@@ -293,9 +402,8 @@ MODULE statisticPort
           P = prob005
           !END IF
         END IF
-
-
       END SUBROUTINE Pvalue
+      
       FUNCTION betai(a,b,x)
         IMPLICIT NONE
         REAL :: a,b
@@ -316,6 +424,7 @@ MODULE statisticPort
         END IF
         RETURN
       END FUNCTION betai
+      
       FUNCTION betacf(a,b,x)
         IMPLICIT NONE
         INTEGER maxit
@@ -349,6 +458,7 @@ MODULE statisticPort
         RETURN
         PAUSE 'a or b too big, or maxit too small in betacf'
       END FUNCTION betacf
+      
       FUNCTION gammln(xx)
         IMPLICIT NONE
         REAL :: xx
