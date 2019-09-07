@@ -591,8 +591,8 @@
     END DO
     StudyPrcp = GhcnPrcpStandardDB(tempNum,2:)
 
-    print *,pstandID,GhcnPrcpStandardDB(tempNum,1)
-    pause
+    !print *,pstandID,GhcnPrcpStandardDB(tempNum,1)
+    !pause
 
     DO j = 1,ValidTavgStationNum
       pstor2ID = GhcnTavgStandardDB(j,1)
