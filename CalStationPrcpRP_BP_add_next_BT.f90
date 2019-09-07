@@ -8,7 +8,7 @@
   !
   !****************************************************************************
 
-  SUBROUTINE CalStationPrcpRP_BP_add_next(StartRate,EndRate)
+  SUBROUTINE CalStationPrcpRP_BP_add_next_BT(StartRate,EndRate)
   !!DEC$ ATTRIBUTES DLLEXPORT,ALIAS:"CalStationPrcpRP_BP" :: CalStationPrcpRP_BP
   USE IFPORT
   USE DFPORT
@@ -155,7 +155,7 @@
   TavgWorkSpace = TRIM(Path)//'\BaseOnTavg\CalculateStationPrcpRP\'
   istatus_dir_ch = CHDIR(TRIM(PrcpWorkSpace)) !设置默认的工作目录
   ! read default namelist file which define default parameters
-  OPEN(UNIT = fileID,FILE = './CalStationPrcpRP_BP_add_next.namelist')
+  OPEN(UNIT = fileID,FILE = './CalStationPrcpRP_BP_add_next_BT.namelist')
   READ (fileID,NML = CSPRPBP,ERR = 8089)
   CLOSE(fileID)
   PRINT "(1X,A18)", ">>参数初始化完成！"
@@ -1893,8 +1893,6 @@
   STOP
 8089 PRINT *,'文件读取错误'
 
-  END SUBROUTINE CalStationPrcpRP_BP_add_next
+  END SUBROUTINE CalStationPrcpRP_BP_add_next_BT
 
 
-
-1
