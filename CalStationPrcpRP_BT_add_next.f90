@@ -693,7 +693,7 @@
               IF(tempCount >= CoverYears) THEN
                 !print *,"enter-enter-enter"
                 !统计站点是否存在配对记录，由于此次只是为了统计是否存在记录
-                ValidStationCoupled(i - StartStationNum + 1 ,MonthNum+1) = 1
+                ValidStationCoupled(i - StartStationNum + 1 ,pTandMonth+1) = 1
 
                 trainLen = FLOOR(tempCount*TrainingRate)
                 ALLOCATE(ptandPrcp(trainLen))
