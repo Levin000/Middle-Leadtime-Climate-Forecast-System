@@ -68,6 +68,18 @@ Program mainProgram
       print *,'  to 2010. Train num is the length of valid couple data minus 1.(as'
       print *,'  default). Couple number of valid data must >= 50(as default).'
       print *,' '
+      print *,'21.Forecast and check the monthly precipitation use simple linear r-'
+      print *,'  egression methods base on precipitation data and temperature data'
+      print *,'  . In this model, The first predictor is precipitation station and '
+      print *,'  the second predictor is temperature station'
+      print *,'  "precipitation + temperature"'
+      print *,' '
+      print *,'22.Forecast and check the monthly precipitation use simple linear r-'
+      print *,'  egression methods base on precipitation data and temperature data'
+      print *,'  . In this model, The first predictor is temperature station and '
+      print *,'  the second predictor is precipitation station'
+      print *,' "temperature + precipitation"'
+      print *,' '
       print *,'The basic data used in this model from GHCN V2 stations precipitati'
       print *,'on data and V3 stations temperature data.'
       print *,''
@@ -90,6 +102,8 @@ Program mainProgram
       print *,'6.CalStationPrcpRP_BT_add_next'
       print *,'7.PredicteAndCheckSystem_BT'
       print *,'8.PredictLastOneData_BT'
+      print *,'21. "precipitation + temperature"'
+      print *,'22. "temperature + precipitation"'
       
 
       read (*,*),PressKey
@@ -112,6 +126,10 @@ Program mainProgram
           print *,'>> PredicteAndCheckSystem_BT      yes/no?'
         case(8)
           print *,'>> PredictLastOneData_BT      yes/no?'
+        case(21)
+          print *,'>> precipitation + temperature      yes/no?'
+        case(22)
+          print *,'>> temperature + precipitation      yes/no?'
         case default
           print *,'>> Incorrect Module Code!'
         end select
@@ -130,6 +148,8 @@ Program mainProgram
           print *,'6.CalStationPrcpRP_BT_add_next'
           print *,'7.PredicteAndCheckSystem_BT'
           print *,'8.PredictLastOneData_BT'
+          print *,'21. "precipitation + temperature"'
+          print *,'22. "temperature + precipitation"'
           read (*,*),PressKey
         end if
       end do
@@ -288,6 +308,74 @@ Program mainProgram
         pause
         case default
         print *,'>> Incorrect Module Code!'
+        pause
+      case(21)
+        !Base On Precipitation
+        print *,' '
+        print *,'Default StartRate = 0.0\EndRate = 1.0, if need please modify those value.'
+        print *,' '
+        print *,'yes/no?'
+        print *,' '
+        read (*,*),ConfirmStr
+        if(trim(ConfirmStr)=='yes') then
+          do while(trim(ConfirmStr)=='yes')
+            print *,' '
+8821        print *,'Please input StartRate(as format 0.x,StartRate should >= 0.0 and less than 1.0):'
+            print *,' '
+            read (*,*) StartRate
+            print *,' '
+            print *,'Please input EndRate(as format 0.x,EndRate should great than 0.0 and <= 1.0):'
+            print *,' '
+            read (*,*) EndRate
+            print *,' '
+            print *,'Modified StartRate is',StartRate,'EndRate is',EndRate
+            print *,' '
+            print *,'yes/no?'
+            print *,' '
+            read (*,*),ConfirmStr
+            print *,'  '
+            if(trim(ConfirmStr)=='yes') then
+              exit
+            else if(trim(ConfirmStr)=='no') then
+              goto 8821
+            end if
+          end do
+        end if
+        call CalStationPrcpRP_BP_add_next_BT(StartRate,EndRate)
+        pause
+      case(22)
+        !Base On Precipitation
+        print *,' '
+        print *,'Default StartRate = 0.0\EndRate = 1.0, if need please modify those value.'
+        print *,' '
+        print *,'yes/no?'
+        print *,' '
+        read (*,*),ConfirmStr
+        if(trim(ConfirmStr)=='yes') then
+          do while(trim(ConfirmStr)=='yes')
+            print *,' '
+8822        print *,'Please input StartRate(as format 0.x,StartRate should >= 0.0 and less than 1.0):'
+            print *,' '
+            read (*,*) StartRate
+            print *,' '
+            print *,'Please input EndRate(as format 0.x,EndRate should great than 0.0 and <= 1.0):'
+            print *,' '
+            read (*,*) EndRate
+            print *,' '
+            print *,'Modified StartRate is',StartRate,'EndRate is',EndRate
+            print *,' '
+            print *,'yes/no?'
+            print *,' '
+            read (*,*),ConfirmStr
+            print *,'  '
+            if(trim(ConfirmStr)=='yes') then
+              exit
+            else if(trim(ConfirmStr)=='no') then
+              goto 8822
+            end if
+          end do
+        end if
+        call CalStationPrcpRP_BT_add_next_BP(StartRate,EndRate)
         pause
       end select
 
