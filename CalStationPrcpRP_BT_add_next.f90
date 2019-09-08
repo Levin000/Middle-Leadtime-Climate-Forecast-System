@@ -859,7 +859,11 @@
       DO jj = 1,saveRankNum
         maxR2 = MAXVAL(TempR(1+(ii-1)*ValidTavgStationNum:ii*ValidTavgStationNum,:))
         CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidTavgStationNum:ii*ValidTavgStationNum,:))
+        !print *,Rtandtor1,maxR2
+        !pause
         IF (Rtandtor1 < -1) THEN
+          !print *,"1"
+          !pause
           WRITE(fileID,'(I15,I10,2F6.2,2F15.4,I15,I10,2F15.4,3F10.2)')INT(pstor1ID,KIND=8),INT(pstor1LM),R2tandtor1,Rtandtor1,DataNumNotEnough,DataNumNotEnough, &
             ValidTavgStationCodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),&
             ptor2k(CodesIndexLocation(1)+(ii-1)*ValidTavgStationNum,CodesIndexLocation(2)),&
@@ -868,7 +872,8 @@
             R(CodesIndexLocation(1)+(ii-1)*ValidTavgStationNum,CodesIndexLocation(2)),&
             P(CodesIndexLocation(1)+(ii-1)*ValidTavgStationNum,CodesIndexLocation(2))
         ELSE IF (maxR2 <= 0) THEN
-
+          !print *,"2"
+          !pause
           !print *,"调整Prcp数据"
           !根据pstor1ID和pstor2ID的情况，修订预报量、预报因子1及预报因子2的降雨量数据
           !另一个不需要修改，原封不动的copy即可
@@ -990,6 +995,8 @@
           DEALLOCATE(CIL)
 
         ELSE
+          !print *,"3"
+          !pause
           !print *,"读取与第二个因子相关的数据，第",jj,"次"
           CALL StudyMonthAndFactorPreData_BT(pstandID,REAL(ii,KIND=8),REAL(ValidTavgStationCodesIndex(CodesIndexLocation(1)),KIND=8),&
             REAL(CodesIndexLocation(2),KIND=8), YearLen,MonthNum,RankNum,&
