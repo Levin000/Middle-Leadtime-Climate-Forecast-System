@@ -106,8 +106,8 @@ Program mainProgram
       print *,'22. "temperature + precipitation"'
       
 
-      read (*,*),PressKey
-      do while(PressKey)
+      read (*,*) PressKey
+      do while(PressKey > 0 )
         print *,'Please confirm the module you want use :'
         select case(PressKey)
         case(1)
@@ -134,7 +134,7 @@ Program mainProgram
           print *,'>> Incorrect Module Code!'
         end select
         print *,' '
-        read (*,*),ConfirmStr
+        read (*,*) ConfirmStr
         print *,' '
         if(trim(ConfirmStr)=='yes') then
           exit
@@ -150,7 +150,7 @@ Program mainProgram
           print *,'8.PredictLastOneData_BT'
           print *,'21. "precipitation + temperature"'
           print *,'22. "temperature + precipitation"'
-          read (*,*),PressKey
+          read (*,*) PressKey
         end if
       end do
 
@@ -162,7 +162,7 @@ Program mainProgram
         print *,' '
         print *,'yes/no?'
         print *,' '
-        read (*,*),ConfirmStr
+        read (*,*) ConfirmStr
         if(trim(ConfirmStr)=='yes') then
           do while(trim(ConfirmStr)=='yes')
             print *,' '
@@ -178,7 +178,7 @@ Program mainProgram
             print *,' '
             print *,'yes/no?'
             print *,' '
-            read (*,*),ConfirmStr
+            read (*,*) ConfirmStr
             print *,'  '
             if(trim(ConfirmStr)=='yes') then
               exit
@@ -196,7 +196,7 @@ Program mainProgram
         print *,' '
         print *,'yes/no?'
         print *,' '
-        read (*,*),ConfirmStr
+        read (*,*) ConfirmStr
         if(trim(ConfirmStr)=='yes') then
           do while(trim(ConfirmStr)=='yes')
             print *,' '
@@ -212,7 +212,7 @@ Program mainProgram
             print *,' '
             print *,'yes/no?'
             print *,' '
-            read (*,*),ConfirmStr
+            read (*,*) ConfirmStr
             print *,'  '
             if(trim(ConfirmStr)=='yes') then
               exit
@@ -238,7 +238,7 @@ Program mainProgram
         print *,' '
         print *,'yes/no?'
         print *,' '
-        read (*,*),ConfirmStr
+        read (*,*) ConfirmStr
         if(trim(ConfirmStr)=='yes') then
           do while(trim(ConfirmStr)=='yes')
             print *,' '
@@ -254,7 +254,7 @@ Program mainProgram
             print *,' '
             print *,'yes/no?'
             print *,' '
-            read (*,*),ConfirmStr
+            read (*,*) ConfirmStr
             if(trim(ConfirmStr)=='yes') then
               exit
             else if(trim(ConfirmStr)=='no') then
@@ -271,7 +271,7 @@ Program mainProgram
         print *,' '
         print *,'yes/no?'
         print *,' '
-        read (*,*),ConfirmStr
+        read (*,*) ConfirmStr
         if(trim(ConfirmStr)=='yes') then
           do while(trim(ConfirmStr)=='yes')
             print *,' '
@@ -287,7 +287,7 @@ Program mainProgram
             print *,' '
             print *,'yes/no?'
             print *,' '
-            read (*,*),ConfirmStr
+            read (*,*) ConfirmStr
             print *,'  '
             if(trim(ConfirmStr)=='yes') then
               exit
@@ -316,7 +316,7 @@ Program mainProgram
         print *,' '
         print *,'yes/no?'
         print *,' '
-        read (*,*),ConfirmStr
+        read (*,*) ConfirmStr
         if(trim(ConfirmStr)=='yes') then
           do while(trim(ConfirmStr)=='yes')
             print *,' '
@@ -332,7 +332,7 @@ Program mainProgram
             print *,' '
             print *,'yes/no?'
             print *,' '
-            read (*,*),ConfirmStr
+            read (*,*) ConfirmStr
             print *,'  '
             if(trim(ConfirmStr)=='yes') then
               exit
@@ -350,7 +350,7 @@ Program mainProgram
         print *,' '
         print *,'yes/no?'
         print *,' '
-        read (*,*),ConfirmStr
+        read (*,*) ConfirmStr
         if(trim(ConfirmStr)=='yes') then
           do while(trim(ConfirmStr)=='yes')
             print *,' '
@@ -366,7 +366,7 @@ Program mainProgram
             print *,' '
             print *,'yes/no?'
             print *,' '
-            read (*,*),ConfirmStr
+            read (*,*) ConfirmStr
             print *,'  '
             if(trim(ConfirmStr)=='yes') then
               exit
