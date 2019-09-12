@@ -634,13 +634,13 @@
             TempMonthStudyPrcp = TempStudyPrcp(ii:(FactorPrcpLen - k):MonthNum)
 
             !print *,"enter1"
-            
+
             !print *,SIZE(tempFactorTavgMonth), SIZE(TempMonthFactorPrcp)
-            
+
             !根据pstor1ID和pstor2ID的情况，修订预报量、预报因子1及预报因子2的降雨量数据
             IF (SIZE(tempFactorTavgMonth)>SIZE(TempMonthFactorPrcp)) THEN
               !print *,'condation 1'
-              
+
               ALLOCATE(tempFactorTavgMonthModify(SIZE(TempMonthFactorPrcp)))
               tempFactorTavgMonthModify = tempFactorTavgMonth(SIZE(tempFactorTavgMonth)-SIZE(TempMonthFactorPrcp)+1:)
               !另一个不需要修改，原封不动的copy即可
@@ -651,7 +651,7 @@
               TempMonthStudyPrcpModify = TempMonthStudyPrcp
             ELSE IF(SIZE(tempFactorTavgMonth)<SIZE(TempMonthFactorPrcp)) THEN
               !print *,'condation 2'
-              
+
               ALLOCATE(TempMonthFactorPrcpModify(SIZE(tempFactorTavgMonth)))
               TempMonthFactorPrcpModify = TempMonthFactorPrcp(SIZE(TempMonthFactorPrcp)-SIZE(tempFactorTavgMonth)+1:)
               !另一个不需要修改，原封不动的copy即可
@@ -662,7 +662,7 @@
               TempMonthStudyPrcpModify = TempMonthStudyPrcp(SIZE(TempMonthFactorPrcp)-SIZE(tempFactorTavgMonth)+1:)
             ELSE
               !print *,'condation 3'
-            
+
               !此时，均不需要修订
               ALLOCATE(TempMonthFactorPrcpModify(SIZE(TempMonthFactorPrcp)))
               TempMonthFactorPrcpModify = TempMonthFactorPrcp
@@ -678,9 +678,9 @@
             !print *,size(TempMonthStudyPrcpModify)
             !print *,size(TempMonthFactorPrcpModify)
             !print *,size(tempFactorTavgMonthModify)
-            
+
             !pause
-            
+
             if((isContinuityGT_M(TempMonthStudyPrcpModify,ClimateStatus,prcp_anomaly_missing) .EQ. .false.) .and.&
               (isContinuityGT_M(TempMonthStudyPrcpModify,ClimateStatus,prcp_anomaly_trace) .EQ. .false.) .and.&
               (isContinuityGT_M(TempMonthFactorPrcpModify,ClimateStatus,prcp_anomaly_missing) .EQ. .false.) .and. &
@@ -741,6 +741,10 @@
                 !计算总预报降雨量
                 ALLOCATE(ptandPrcpY(trainLen))
                 ptandPrcpY = ptandPrcpY1+ptandPrcpY2
+                !当总预报方程中Y < 0时，直接设为0即可
+                WHERE (ptandPrcpY < 0)
+                  ptandPrcpY = 0
+                END WHERE
                 !计算预报量站点与第二个因子的相关系数
                 CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
                 R(j+(pTandMonth-1)*ValidPrcpStationNum,k) = RptandY
@@ -760,7 +764,7 @@
               END IF
               DEALLOCATE(CodesIndexLocation)
             END IF
-            
+
             !print *,'wa'
 
             DEALLOCATE(TempMonthFactorPrcp)
@@ -874,9 +878,9 @@
         maxR2 = MAXVAL(TempR(1+(ii-1)*ValidPrcpStationNum:ii*ValidPrcpStationNum,:))
         CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidPrcpStationNum:ii*ValidPrcpStationNum,:))
         IF (Rtandtor1 < -1) THEN
-          
+
           !print *,"if 1"
-          
+
           WRITE(fileID,'(I15,I10,2F6.2,2F15.4,I15,I10,2F15.4,3F10.2)')INT(pstor1ID,KIND=8),INT(pstor1LM),R2tandtor1,Rtandtor1,DataNumNotEnough,DataNumNotEnough, &
             ValidPrcpStationCodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),&
             ptor2k(CodesIndexLocation(1)+(ii-1)*ValidPrcpStationNum,CodesIndexLocation(2)),&
@@ -885,9 +889,9 @@
             R(CodesIndexLocation(1)+(ii-1)*ValidPrcpStationNum,CodesIndexLocation(2)),&
             P(CodesIndexLocation(1)+(ii-1)*ValidPrcpStationNum,CodesIndexLocation(2))
         ELSE IF (maxR2 <= 0) THEN
-        
+
           !print *,"if 2"
-        
+
           !print *,"调整Prcp数据"
           !根据pstor1ID和pstor2ID的情况，修订预报量、预报因子1及预报因子2的降雨量数据
           !另一个不需要修改，原封不动的copy即可
@@ -941,6 +945,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
 
@@ -1009,9 +1017,9 @@
           DEALLOCATE(CIL)
 
         ELSE
-        
+
           !print *,"if 3"
-          
+
           !print *,"读取与第二个因子相关的数据，第",jj,"次"
           CALL StudyMonthAndFactorPreData_BP(pstandID,REAL(ii,KIND=8),REAL(ValidPrcpStationCodesIndex(CodesIndexLocation(1)),KIND=8),&
             REAL(CodesIndexLocation(2),KIND=8), YearLen,MonthNum,RankNum,&
@@ -1109,6 +1117,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1+ptandPrcpY2
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
           CALL Pvalue(trainLen, RptandY, PptandY)
@@ -1300,6 +1312,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
 
@@ -1465,6 +1481,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1+ptandPrcpY2
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
           CALL Pvalue(trainLen, RptandY, PptandY)
@@ -1654,6 +1674,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
 
@@ -1819,6 +1843,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1+ptandPrcpY2
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
           CALL Pvalue(trainLen, RptandY, PptandY)

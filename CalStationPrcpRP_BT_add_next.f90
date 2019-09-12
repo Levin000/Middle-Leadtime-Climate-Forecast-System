@@ -718,14 +718,18 @@
                 CALL LinearRegression(ptor2Tavg,ptandPrcpY1Residual,trainLen,tempPtor2k, tempPtor2b)
                 ptor2k(j+(pTandMonth-1)*ValidTavgStationNum,k) = tempPtor2k
                 ptor2b(j+(pTandMonth-1)*ValidTavgStationNum,k) = tempPtor2b
-                
+
                 !print *,"enter-enter-enter2"
-                
+
                 ALLOCATE(ptandPrcpY2(trainLen))
                 ptandPrcpY2 = ptor2Tavg*tempPtor2k + tempPtor2b
                 !计算总预报降雨量
                 ALLOCATE(ptandPrcpY(trainLen))
                 ptandPrcpY = ptandPrcpY1+ptandPrcpY2
+                !当总预报方程中Y < 0时，直接设为0即可
+                WHERE (ptandPrcpY < 0)
+                  ptandPrcpY = 0
+                END WHERE
                 !计算预报量站点与第二个因子的相关系数
                 CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
                 R(j+(pTandMonth-1)*ValidTavgStationNum,k) = RptandY
@@ -927,6 +931,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
 
@@ -1096,6 +1104,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1+ptandPrcpY2
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
           CALL Pvalue(trainLen, RptandY, PptandY)
@@ -1283,6 +1295,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
 
@@ -1450,6 +1466,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1+ptandPrcpY2
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
           CALL Pvalue(trainLen, RptandY, PptandY)
@@ -1627,6 +1647,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
 
@@ -1800,6 +1824,10 @@
           !计算总预报降雨量
           ALLOCATE(ptandPrcpY(trainLen))
           ptandPrcpY = ptandPrcpY1+ptandPrcpY2
+          !当总预报方程中Y < 0时，直接设为0即可
+          WHERE (ptandPrcpY < 0)
+            ptandPrcpY = 0
+          END WHERE
           !计算预报量站点观测记录与预报的相关系数
           CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
           CALL Pvalue(trainLen, RptandY, PptandY)
