@@ -74,7 +74,7 @@
 
   INTEGER :: StudyStationNum001
   INTEGER :: pTandMonth                                           !预报量站点的当前月份（在AheadMonth和MonthRoll控制下），
-  INTEGER :: trainLen
+  INTEGER :: trainLen, saveTrainLen
 
   INTEGER(KIND = 8)  StudyCode
   INTEGER(KIND = 8), ALLOCATABLE :: ValidTavgStationCodesIndex(:)   !提取出Factor的站点编号
@@ -906,37 +906,40 @@
           END DO
 
           !print *,"重新调整ptand，ptor1，ptor2数据"
-
+          saveTrainLen = FLOOR(tempCount*1.0)
           trainLen = FLOOR(tempCount*TrainingRate)
           ! 这里ptor1Tavg
-          ALLOCATE(ptandPrcp(trainLen))
-          ALLOCATE(ptor1Tavg(trainLen))
-          ptandPrcp = savePtand1PrcpModify(CIL(1:trainLen))
-          ptor1Tavg = savePtror1TavgModify(CIL(1:trainLen))
+          ALLOCATE(ptandPrcp(saveTrainLen))
+          ALLOCATE(ptor1Tavg(saveTrainLen))
+          ptandPrcp = savePtand1PrcpModify(CIL(1:saveTrainLen))
+          ptor1Tavg = savePtror1TavgModify(CIL(1:saveTrainLen))
 
           !print *,"拟合第一预报因子与预报量"
 
           !线性回归拟合第一预报因子站点与预报量站点之间的线性关系
-          CALL LinearRegression(ptor1Tavg,ptandPrcp,trainLen,ptor1k,ptor1b)
+          CALL LinearRegression(ptor1Tavg(1:trainLen),ptandPrcp(1:trainLen),trainLen,ptor1k,ptor1b)
 
           !print *,ptor1Tavg,ptandPrcp,ptor1k,ptor1b
 
-          ALLOCATE(ptandPrcpY1(trainLen))
+          ALLOCATE(ptandPrcpY1(saveTrainLen))
+          ptandPrcpY1 = -9999
           ptandPrcpY1 = ptor1Tavg*ptor1k + ptor1b
           !计算预报量与第一预报因子的“残差”
-          ALLOCATE(ptandPrcpY1Residual(trainLen))
+          ALLOCATE(ptandPrcpY1Residual(saveTrainLen))
+          ptandPrcpY1Residual = -9999
           ptandPrcpY1Residual = ptandPrcp-ptandPrcpY1
           !print *,"拟合第二预报因子与预报量"
 
           !计算总预报降雨量
-          ALLOCATE(ptandPrcpY(trainLen))
+          ALLOCATE(ptandPrcpY(saveTrainLen))
+           ptandPrcpY1Residual = -9999
           ptandPrcpY = ptandPrcpY1
           !当总预报方程中Y < 0时，直接设为0即可
           WHERE (ptandPrcpY < 0)
             ptandPrcpY = 0
           END WHERE
           !计算预报量站点观测记录与预报的相关系数
-          CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
+          CALL Correlation(trainLen,ptandPrcpY(1:trainLen),ptandPrcp(1:trainLen),RptandY)
 
           !print *,"第一个因子信息："
           !print *,"原始记录：",pstor1ID,pstor1LM,Rtandtor1,"k:",ptor1k,"b:",ptor1b
@@ -1075,41 +1078,45 @@
           END DO
 
           !print *,"重新调整ptand，ptor1，ptor2数据"
-
+          saveTrainLen = FLOOR(tempCount*1.0)
           trainLen = FLOOR(tempCount*TrainingRate)
-          ALLOCATE(ptandPrcp(trainLen))
-          ALLOCATE(ptor1Tavg(trainLen))
-          ALLOCATE(ptor2Tavg(trainLen))
-          ptandPrcp = savePtand1PrcpModify(CIL(1:trainLen))
-          ptor1Tavg = savePtror1TavgModify(CIL(1:trainLen))
-          ptor2Tavg = savePtror2TavgModify(CIL(1:trainLen))
+          ALLOCATE(ptandPrcp(saveTrainLen))
+          ALLOCATE(ptor1Tavg(saveTrainLen))
+          ALLOCATE(ptor2Tavg(saveTrainLen))
+          ptandPrcp = savePtand1PrcpModify(CIL(1:saveTrainLen))
+          ptor1Tavg = savePtror1TavgModify(CIL(1:saveTrainLen))
+          ptor2Tavg = savePtror2TavgModify(CIL(1:saveTrainLen))
 
           !print *,"拟合第一预报因子与预报量"
 
           !线性回归拟合第一预报因子站点与预报量站点之间的线性关系
-          CALL LinearRegression(ptor1Tavg,ptandPrcp,trainLen,ptor1k,ptor1b)
+          CALL LinearRegression(ptor1Tavg(1:trainLen),ptandPrcp(1:trainLen),trainLen,ptor1k,ptor1b)
 
           !print *,ptor1Tavg,ptandPrcp,ptor1k,ptor1b
 
-          ALLOCATE(ptandPrcpY1(trainLen))
+          ALLOCATE(ptandPrcpY1(saveTrainLen))
+          ptandPrcpY1 = -9999
           ptandPrcpY1 = ptor1Tavg*ptor1k + ptor1b
           !计算预报量与第一预报因子的“残差”
-          ALLOCATE(ptandPrcpY1Residual(trainLen))
+          ALLOCATE(ptandPrcpY1Residual(saveTrainLen))
+          ptandPrcpY1Residual = -9999
           ptandPrcpY1Residual = ptandPrcp-ptandPrcpY1
           !print *,"拟合第二预报因子与预报量"
           !线性回归拟合预报量与第一预报因子的“残差”和第二预报因子之间的线性关系
-          CALL LinearRegression(ptor2Tavg,ptandPrcpY1Residual,trainLen,tempPtor2k, tempPtor2b)
-          ALLOCATE(ptandPrcpY2(trainLen))
+          CALL LinearRegression(ptor2Tavg(1:trainLen),ptandPrcpY1Residual(1:trainLen),trainLen,tempPtor2k, tempPtor2b)
+          ALLOCATE(ptandPrcpY2(saveTrainLen))
+          ptandPrcpY2 = -9999
           ptandPrcpY2 = ptor2Tavg*tempPtor2k + tempPtor2b
           !计算总预报降雨量
-          ALLOCATE(ptandPrcpY(trainLen))
+          ALLOCATE(ptandPrcpY(saveTrainLen))
+          ptandPrcpY = -9999
           ptandPrcpY = ptandPrcpY1+ptandPrcpY2
           !当总预报方程中Y < 0时，直接设为0即可
           WHERE (ptandPrcpY < 0)
             ptandPrcpY = 0
           END WHERE
           !计算预报量站点观测记录与预报的相关系数
-          CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
+          CALL Correlation(trainLen,ptandPrcpY(1:trainLen),ptandPrcp(1:trainLen),RptandY)
           CALL Pvalue(trainLen, RptandY, PptandY)
           !print *,"第一个因子信息："
           !print *,"原始记录：",pstor1ID,pstor1LM,Rtandtor1,"k:",ptor1k,"b:",ptor1b
@@ -1270,37 +1277,41 @@
             END IF
           END DO
 
-          !print *,"重新调整ptand，ptor1，ptor2数据"
-
+           !print *,"重新调整ptand，ptor1，ptor2数据"
+          saveTrainLen = FLOOR(tempCount*1.0)
           trainLen = FLOOR(tempCount*TrainingRate)
-          ALLOCATE(ptandPrcp(trainLen))
-          ALLOCATE(ptor1Tavg(trainLen))
-          ptandPrcp = savePtand1PrcpModify(CIL(1:trainLen))
-          ptor1Tavg = savePtror1TavgModify(CIL(1:trainLen))
+          ! 这里ptor1Tavg
+          ALLOCATE(ptandPrcp(saveTrainLen))
+          ALLOCATE(ptor1Tavg(saveTrainLen))
+          ptandPrcp = savePtand1PrcpModify(CIL(1:saveTrainLen))
+          ptor1Tavg = savePtror1TavgModify(CIL(1:saveTrainLen))
 
           !print *,"拟合第一预报因子与预报量"
 
           !线性回归拟合第一预报因子站点与预报量站点之间的线性关系
-          CALL LinearRegression(ptor1Tavg,ptandPrcp,trainLen,ptor1k,ptor1b)
+          CALL LinearRegression(ptor1Tavg(1:trainLen),ptandPrcp(1:trainLen),trainLen,ptor1k,ptor1b)
 
           !print *,ptor1Tavg,ptandPrcp,ptor1k,ptor1b
 
-          ALLOCATE(ptandPrcpY1(trainLen))
+          ALLOCATE(ptandPrcpY1(saveTrainLen))
+          ptandPrcpY1 = -9999
           ptandPrcpY1 = ptor1Tavg*ptor1k + ptor1b
           !计算预报量与第一预报因子的“残差”
-          ALLOCATE(ptandPrcpY1Residual(trainLen))
+          ALLOCATE(ptandPrcpY1Residual(saveTrainLen))
+          ptandPrcpY1Residual = -9999
           ptandPrcpY1Residual = ptandPrcp-ptandPrcpY1
           !print *,"拟合第二预报因子与预报量"
 
           !计算总预报降雨量
-          ALLOCATE(ptandPrcpY(trainLen))
+          ALLOCATE(ptandPrcpY(saveTrainLen))
+           ptandPrcpY1Residual = -9999
           ptandPrcpY = ptandPrcpY1
           !当总预报方程中Y < 0时，直接设为0即可
           WHERE (ptandPrcpY < 0)
             ptandPrcpY = 0
           END WHERE
           !计算预报量站点观测记录与预报的相关系数
-          CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
+          CALL Correlation(trainLen,ptandPrcpY(1:trainLen),ptandPrcp(1:trainLen),RptandY)
 
           !print *,"第一个因子信息："
           !print *,"原始记录：",pstor1ID,pstor1LM,Rtandtor1,"k:",ptor1k,"b:",ptor1b
@@ -1437,41 +1448,45 @@
           END DO
 
           !print *,"重新调整ptand，ptor1，ptor2数据"
-
+          saveTrainLen = FLOOR(tempCount*1.0)
           trainLen = FLOOR(tempCount*TrainingRate)
-          ALLOCATE(ptandPrcp(trainLen))
-          ALLOCATE(ptor1Tavg(trainLen))
-          ALLOCATE(ptor2Tavg(trainLen))
-          ptandPrcp = savePtand1PrcpModify(CIL(1:trainLen))
-          ptor1Tavg = savePtror1TavgModify(CIL(1:trainLen))
-          ptor2Tavg = savePtror2TavgModify(CIL(1:trainLen))
+          ALLOCATE(ptandPrcp(saveTrainLen))
+          ALLOCATE(ptor1Tavg(saveTrainLen))
+          ALLOCATE(ptor2Tavg(saveTrainLen))
+          ptandPrcp = savePtand1PrcpModify(CIL(1:saveTrainLen))
+          ptor1Tavg = savePtror1TavgModify(CIL(1:saveTrainLen))
+          ptor2Tavg = savePtror2TavgModify(CIL(1:saveTrainLen))
 
           !print *,"拟合第一预报因子与预报量"
 
           !线性回归拟合第一预报因子站点与预报量站点之间的线性关系
-          CALL LinearRegression(ptor1Tavg,ptandPrcp,trainLen,ptor1k,ptor1b)
+          CALL LinearRegression(ptor1Tavg(1:trainLen),ptandPrcp(1:trainLen),trainLen,ptor1k,ptor1b)
 
           !print *,ptor1Tavg,ptandPrcp,ptor1k,ptor1b
 
-          ALLOCATE(ptandPrcpY1(trainLen))
+          ALLOCATE(ptandPrcpY1(saveTrainLen))
+          ptandPrcpY1 = -9999
           ptandPrcpY1 = ptor1Tavg*ptor1k + ptor1b
           !计算预报量与第一预报因子的“残差”
-          ALLOCATE(ptandPrcpY1Residual(trainLen))
+          ALLOCATE(ptandPrcpY1Residual(saveTrainLen))
+          ptandPrcpY1Residual = -9999
           ptandPrcpY1Residual = ptandPrcp-ptandPrcpY1
           !print *,"拟合第二预报因子与预报量"
           !线性回归拟合预报量与第一预报因子的“残差”和第二预报因子之间的线性关系
-          CALL LinearRegression(ptor2Tavg,ptandPrcpY1Residual,trainLen,tempPtor2k, tempPtor2b)
-          ALLOCATE(ptandPrcpY2(trainLen))
+          CALL LinearRegression(ptor2Tavg(1:trainLen),ptandPrcpY1Residual(1:trainLen),trainLen,tempPtor2k, tempPtor2b)
+          ALLOCATE(ptandPrcpY2(saveTrainLen))
+          ptandPrcpY2 = -9999
           ptandPrcpY2 = ptor2Tavg*tempPtor2k + tempPtor2b
           !计算总预报降雨量
-          ALLOCATE(ptandPrcpY(trainLen))
+          ALLOCATE(ptandPrcpY(saveTrainLen))
+          ptandPrcpY = -9999
           ptandPrcpY = ptandPrcpY1+ptandPrcpY2
           !当总预报方程中Y < 0时，直接设为0即可
           WHERE (ptandPrcpY < 0)
             ptandPrcpY = 0
           END WHERE
           !计算预报量站点观测记录与预报的相关系数
-          CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
+          CALL Correlation(trainLen,ptandPrcpY(1:trainLen),ptandPrcp(1:trainLen),RptandY)
           CALL Pvalue(trainLen, RptandY, PptandY)
           !print *,"第一个因子信息："
           !print *,"原始记录：",pstor1ID,pstor1LM,Rtandtor1,"k:",ptor1k,"b:",ptor1b
@@ -1622,37 +1637,41 @@
             END IF
           END DO
 
-          !print *,"重新调整ptand，ptor1，ptor2数据"
-
+           !print *,"重新调整ptand，ptor1，ptor2数据"
+          saveTrainLen = FLOOR(tempCount*1.0)
           trainLen = FLOOR(tempCount*TrainingRate)
-          ALLOCATE(ptandPrcp(trainLen))
-          ALLOCATE(ptor1Tavg(trainLen))
-          ptandPrcp = savePtand1PrcpModify(CIL(1:trainLen))
-          ptor1Tavg = savePtror1TavgModify(CIL(1:trainLen))
+          ! 这里ptor1Tavg
+          ALLOCATE(ptandPrcp(saveTrainLen))
+          ALLOCATE(ptor1Tavg(saveTrainLen))
+          ptandPrcp = savePtand1PrcpModify(CIL(1:saveTrainLen))
+          ptor1Tavg = savePtror1TavgModify(CIL(1:saveTrainLen))
 
           !print *,"拟合第一预报因子与预报量"
 
           !线性回归拟合第一预报因子站点与预报量站点之间的线性关系
-          CALL LinearRegression(ptor1Tavg,ptandPrcp,trainLen,ptor1k,ptor1b)
+          CALL LinearRegression(ptor1Tavg(1:trainLen),ptandPrcp(1:trainLen),trainLen,ptor1k,ptor1b)
 
           !print *,ptor1Tavg,ptandPrcp,ptor1k,ptor1b
 
-          ALLOCATE(ptandPrcpY1(trainLen))
+          ALLOCATE(ptandPrcpY1(saveTrainLen))
+          ptandPrcpY1 = -9999
           ptandPrcpY1 = ptor1Tavg*ptor1k + ptor1b
           !计算预报量与第一预报因子的“残差”
-          ALLOCATE(ptandPrcpY1Residual(trainLen))
+          ALLOCATE(ptandPrcpY1Residual(saveTrainLen))
+          ptandPrcpY1Residual = -9999
           ptandPrcpY1Residual = ptandPrcp-ptandPrcpY1
           !print *,"拟合第二预报因子与预报量"
 
           !计算总预报降雨量
-          ALLOCATE(ptandPrcpY(trainLen))
+          ALLOCATE(ptandPrcpY(saveTrainLen))
+           ptandPrcpY1Residual = -9999
           ptandPrcpY = ptandPrcpY1
           !当总预报方程中Y < 0时，直接设为0即可
           WHERE (ptandPrcpY < 0)
             ptandPrcpY = 0
           END WHERE
           !计算预报量站点观测记录与预报的相关系数
-          CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
+          CALL Correlation(trainLen,ptandPrcpY(1:trainLen),ptandPrcp(1:trainLen),RptandY)
 
           !print *,"第一个因子信息："
           !print *,"原始记录：",pstor1ID,pstor1LM,Rtandtor1,"k:",ptor1k,"b:",ptor1b
@@ -1795,41 +1814,45 @@
           END DO
 
           !print *,"重新调整ptand，ptor1，ptor2数据"
-
+          saveTrainLen = FLOOR(tempCount*1.0)
           trainLen = FLOOR(tempCount*TrainingRate)
-          ALLOCATE(ptandPrcp(trainLen))
-          ALLOCATE(ptor1Tavg(trainLen))
-          ALLOCATE(ptor2Tavg(trainLen))
-          ptandPrcp = savePtand1PrcpModify(CIL(1:trainLen))
-          ptor1Tavg = savePtror1TavgModify(CIL(1:trainLen))
-          ptor2Tavg = savePtror2TavgModify(CIL(1:trainLen))
+          ALLOCATE(ptandPrcp(saveTrainLen))
+          ALLOCATE(ptor1Tavg(saveTrainLen))
+          ALLOCATE(ptor2Tavg(saveTrainLen))
+          ptandPrcp = savePtand1PrcpModify(CIL(1:saveTrainLen))
+          ptor1Tavg = savePtror1TavgModify(CIL(1:saveTrainLen))
+          ptor2Tavg = savePtror2TavgModify(CIL(1:saveTrainLen))
 
           !print *,"拟合第一预报因子与预报量"
 
           !线性回归拟合第一预报因子站点与预报量站点之间的线性关系
-          CALL LinearRegression(ptor1Tavg,ptandPrcp,trainLen,ptor1k,ptor1b)
+          CALL LinearRegression(ptor1Tavg(1:trainLen),ptandPrcp(1:trainLen),trainLen,ptor1k,ptor1b)
 
           !print *,ptor1Tavg,ptandPrcp,ptor1k,ptor1b
 
-          ALLOCATE(ptandPrcpY1(trainLen))
+          ALLOCATE(ptandPrcpY1(saveTrainLen))
+          ptandPrcpY1 = -9999
           ptandPrcpY1 = ptor1Tavg*ptor1k + ptor1b
           !计算预报量与第一预报因子的“残差”
-          ALLOCATE(ptandPrcpY1Residual(trainLen))
+          ALLOCATE(ptandPrcpY1Residual(saveTrainLen))
+          ptandPrcpY1Residual = -9999
           ptandPrcpY1Residual = ptandPrcp-ptandPrcpY1
           !print *,"拟合第二预报因子与预报量"
           !线性回归拟合预报量与第一预报因子的“残差”和第二预报因子之间的线性关系
-          CALL LinearRegression(ptor2Tavg,ptandPrcpY1Residual,trainLen,tempPtor2k, tempPtor2b)
-          ALLOCATE(ptandPrcpY2(trainLen))
+          CALL LinearRegression(ptor2Tavg(1:trainLen),ptandPrcpY1Residual(1:trainLen),trainLen,tempPtor2k, tempPtor2b)
+          ALLOCATE(ptandPrcpY2(saveTrainLen))
+          ptandPrcpY2 = -9999
           ptandPrcpY2 = ptor2Tavg*tempPtor2k + tempPtor2b
           !计算总预报降雨量
-          ALLOCATE(ptandPrcpY(trainLen))
+          ALLOCATE(ptandPrcpY(saveTrainLen))
+          ptandPrcpY = -9999
           ptandPrcpY = ptandPrcpY1+ptandPrcpY2
           !当总预报方程中Y < 0时，直接设为0即可
           WHERE (ptandPrcpY < 0)
             ptandPrcpY = 0
           END WHERE
           !计算预报量站点观测记录与预报的相关系数
-          CALL Correlation(trainLen,ptandPrcpY,ptandPrcp,RptandY)
+          CALL Correlation(trainLen,ptandPrcpY(1:trainLen),ptandPrcp(1:trainLen),RptandY)
           CALL Pvalue(trainLen, RptandY, PptandY)
           !print *,"第一个因子信息："
           !print *,"原始记录：",pstor1ID,pstor1LM,Rtandtor1,"k:",ptor1k,"b:",ptor1b
