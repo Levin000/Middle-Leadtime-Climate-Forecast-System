@@ -536,7 +536,7 @@
       IF (GhcnPrcpStandardDB(tempNum,1) == pstandID) EXIT
     END DO
     StudyPrcp = GhcnPrcpStandardDB(tempNum,2:)
-    print *,tempNum,"=======",pstandID,GhcnPrcpStandardDB(tempNum,1)
+    !print *,tempNum,"=======",pstandID,GhcnPrcpStandardDB(tempNum,1)
     !pause
 
     DO j = 1,ValidStationNum

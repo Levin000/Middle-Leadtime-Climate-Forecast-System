@@ -63,6 +63,9 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
       INTEGER :: i,j,k,ic,im,StartStationNum,EndStationNum,analysisStationNum
       INTEGER :: ClimateStatus
       INTEGER :: R2CountTotal                                          !单站点单月份有效R2的总数量
+      
+      INTEGER :: trainLen, leaveOut
+      
       INTEGER(KIND = 8)  StudyCode
       INTEGER(KIND = 8), ALLOCATABLE :: CodesIndex(:)                 !提取出研究的站点编号
       INTEGER(KIND = 8), ALLOCATABLE :: CodesIndexLocation(:)         !存储某一个站点再数据库中的索引值(行位置)
@@ -86,7 +89,7 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
       LOGICAL(4) :: istatus_dir_mk,alive                              !文件存在状态
       NAMELIST /CSPRPBP/ prcp_anomaly_missing,prcp_anomaly_trace,times,GhcnPrcpColNum,MissVal,&
                          TraceVal,AheadMonthNum,StartMonth,StartYear,EndYear,MonthNum,ClimateStatus,&
-                         RankNum,PPvalue,TrainingRate,CoverYears
+                         RankNum,PPvalue,TrainingRate,CoverYears,leaveOut
       !****************************************************************************
       ! !                        Formatting
       !****************************************************************************
@@ -464,27 +467,34 @@ SUBROUTINE CalStationPrcpRP_BP(StartRate,EndRate)
                 END DO
 
                 IF(tempCount >= CoverYears) THEN
+                  !设置trainLen的长度
+                  IF (leaveOut < 0) THEN
+                    trainLen = FLOOR(tempCount*TrainingRate)
+                  ELSE
+                    trainLen = tempCount - leaveOut
+                  END IF
+                  
                   IF(MOD(k + ii + StartMonth - 1,MonthNum) == 0) THEN
                     ValidStationCoupled(i - StartStationNum + 1 ,MonthNum+1) = 1  !统计站点是否存在配对记录，由于此次只是为了统计是否存在记录
-                    CALL Correlation(FLOOR(tempCount*TrainingRate),TempMonthFactorPrcp(CodesIndexLocation(1:FLOOR(tempCount*TrainingRate))),&
-                      TempMonthStudyPrcp(CodesIndexLocation(1:FLOOR(tempCount*TrainingRate))),R(j+(MonthNum-1)*ValidStationNum,k))
+                    CALL Correlation(trainLen,TempMonthFactorPrcp(CodesIndexLocation(1:trainLen)),&
+                      TempMonthStudyPrcp(CodesIndexLocation(1:trainLen)),R(j+(MonthNum-1)*ValidStationNum,k))
                     !IF(R(j+(MonthNum-1)*ValidStationNum,k) == R_Inf) THEN
                     !  P(j+(MonthNum-1)*ValidStationNum,k) = R_Inf
                     !ELSE
-                    CALL Pvalue(FLOOR(tempCount*TrainingRate),R(j+(MonthNum-1)*ValidStationNum,k),P(j+(MonthNum-1)*ValidStationNum,k))
+                    CALL Pvalue(trainLen,R(j+(MonthNum-1)*ValidStationNum,k),P(j+(MonthNum-1)*ValidStationNum,k))
                     !END IF
 
                     !print *,'codsID:',CodesIndex(j),'ahead:',k,',month:',MonthNum,',r:',R(j+(MonthNum-1)*ValidStationNum,k),',p:',P(j+(MonthNum-1)*ValidStationNum,k)
 
                   ELSE
                     ValidStationCoupled(i - StartStationNum + 1 ,MOD(k + ii + StartMonth - 1,MonthNum)+1) = 1  !统计站点是否存在配对记录，由于此次只是为了统计是否存在记录
-                    CALL Correlation(FLOOR(tempCount*TrainingRate),TempMonthFactorPrcp(CodesIndexLocation(1:FLOOR(tempCount*TrainingRate))),&
-                      TempMonthStudyPrcp(CodesIndexLocation(1:FLOOR(tempCount*TrainingRate))),&
+                    CALL Correlation(trainLen,TempMonthFactorPrcp(CodesIndexLocation(1:trainLen)),&
+                      TempMonthStudyPrcp(CodesIndexLocation(1:trainLen)),&
                       R(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidStationNum,k))
                     !IF(R(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidStationNum,k) == R_Inf) THEN
                     !  P(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidStationNum,k) = R_Inf
                     !ELSE
-                    CALL Pvalue(FLOOR(tempCount*TrainingRate),R(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidStationNum,k),&
+                    CALL Pvalue(trainLen,R(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidStationNum,k),&
                       P(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidStationNum,k))
                     !END IF
 

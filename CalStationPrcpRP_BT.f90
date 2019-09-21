@@ -65,6 +65,9 @@ SUBROUTINE CalStationPrcpRP_BT(StartRate,EndRate)
       INTEGER :: i,j,k,ic,im,StartStationNum,EndStationNum,analysisStationNum
       INTEGER :: ClimateStatus
       INTEGER :: R2CountTotal
+      
+      INTEGER :: trainLen, leaveOut
+      
       INTEGER(KIND = 8)  StudyCode
       INTEGER(KIND = 8), ALLOCATABLE :: ValidTavgStationCodesIndex(:)   !提取出Factor的站点编号
       INTEGER(KIND = 8), ALLOCATABLE :: ValidPrcpStationCodesIndex(:)   !提取出研究的站点编号
@@ -518,24 +521,31 @@ SUBROUTINE CalStationPrcpRP_BT(StartRate,EndRate)
                 END DO
                 !print *,'tempCount',tempCount
                 IF(tempCount >= CoverYears) THEN
+                  !设置trainLen的长度
+                  IF (leaveOut < 0) THEN
+                    trainLen = FLOOR(tempCount*TrainingRate)
+                  ELSE
+                    trainLen = tempCount - leaveOut
+                  END IF
+                
                   IF(MOD(k + ii + StartMonth - 1,MonthNum) == 0) THEN
                     ValidStationCoupled(i - StartStationNum + 1 ,MonthNum+1) = 1  !统计站点是否存在配对记录，由于此次只是为了统计是否存在记录
-                    CALL Correlation(FLOOR(tempCount*TrainingRate),TempMonthFactorTavg(CodesIndexLocation(1:FLOOR(tempCount*TrainingRate))),&
-                      TempMonthStudyPrcp(CodesIndexLocation(1:FLOOR(tempCount*TrainingRate))),R(j+(MonthNum-1)*ValidTavgStationNum,k))
+                    CALL Correlation(trainLen,TempMonthFactorTavg(CodesIndexLocation(1:trainLen)),&
+                      TempMonthStudyPrcp(CodesIndexLocation(1:trainLen)),R(j+(MonthNum-1)*ValidTavgStationNum,k))
                     !IF(R(j+(MonthNum-1)*ValidTavgStationNum,k) == R_Inf) THEN
                     !  P(j+(MonthNum-1)*ValidTavgStationNum,k) = R_Inf
                     !ELSE
-                    CALL Pvalue(FLOOR(tempCount*TrainingRate),R(j+(MonthNum-1)*ValidTavgStationNum,k),P(j+(MonthNum-1)*ValidTavgStationNum,k))
+                    CALL Pvalue(trainLen,R(j+(MonthNum-1)*ValidTavgStationNum,k),P(j+(MonthNum-1)*ValidTavgStationNum,k))
                     !END IF
                   ELSE
                     ValidStationCoupled(i - StartStationNum + 1 ,MOD(k + ii + StartMonth - 1,MonthNum)+1) = 1  !统计站点是否存在配对记录，由于此次只是为了统计是否存在记录
-                    CALL Correlation(FLOOR(tempCount*TrainingRate),TempMonthFactorTavg(CodesIndexLocation(1:FLOOR(tempCount*TrainingRate))),&
-                      TempMonthStudyPrcp(CodesIndexLocation(1:FLOOR(tempCount*TrainingRate))),&
+                    CALL Correlation(trainLen,TempMonthFactorTavg(CodesIndexLocation(1:trainLen)),&
+                      TempMonthStudyPrcp(CodesIndexLocation(1:trainLen)),&
                       R(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidTavgStationNum,k))
                     !IF(R(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidTavgStationNum,k) == R_Inf) THEN
                     !  P(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidTavgStationNum,k) = R_Inf
                     !ELSE
-                    CALL Pvalue(FLOOR(tempCount*TrainingRate),R(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidTavgStationNum,k),&
+                    CALL Pvalue(trainLen,R(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidTavgStationNum,k),&
                       P(j+(MOD(k + ii + StartMonth - 1,MonthNum)-1)*ValidTavgStationNum,k))
                     !END IF
                   END IF
