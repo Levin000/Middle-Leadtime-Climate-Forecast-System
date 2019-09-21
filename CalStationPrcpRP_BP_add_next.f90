@@ -482,7 +482,7 @@
     PRINT *,' '
     READ (*,*) StartStationNum
     PRINT *,' '
-    PRINT *,'Please input StartNum(as integer format ,StartNum should >= 1 and <= 20547):'
+    PRINT *,'Please input EndNum(as integer format ,StartNum should >= 1 and <= 20547):'
     PRINT *,' '
     READ (*,*) EndStationNum
     PRINT *,' '
