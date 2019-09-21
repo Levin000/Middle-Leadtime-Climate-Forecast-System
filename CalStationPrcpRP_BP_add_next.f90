@@ -65,7 +65,7 @@
   INTEGER :: ClimateStatus
   INTEGER :: R2CountTotal                                          !单站点单月份有效R2的总数量
 
-  INTEGER :: trainLen, saveTrainLen
+  INTEGER :: trainLen, saveTrainLen, leaveOut
 
   INTEGER(KIND = 8)  StudyCode
   INTEGER(KIND = 8), ALLOCATABLE :: CodesIndex(:)                 !提取出研究的站点编号
@@ -119,7 +119,7 @@
   LOGICAL(4) :: istatus_dir_mk,alive                              !文件存在状态
   NAMELIST /CSPRPBP/ prcp_anomaly_missing,prcp_anomaly_trace,times,GhcnPrcpColNum,MissVal,&
     TraceVal,AheadMonthNum,StartMonth,StartYear,EndYear,MonthNum,ClimateStatus,&
-    RankNum,PPvalue,TrainingRate,CoverYears,saveRankNum
+    RankNum,PPvalue,TrainingRate,CoverYears,saveRankNum,leaveOut
   !****************************************************************************
   ! !                        Formatting
   !****************************************************************************
@@ -633,7 +633,13 @@
                 !统计站点是否存在配对记录，由于此次只是为了统计是否存在记录
                 ValidStationCoupled(i - StartStationNum + 1 ,pTandMonth+1) = 1
 
-                trainLen = FLOOR(tempCount*TrainingRate)
+                !设置trainLen的长度
+                IF (leaveOut < 0) THEN
+                  trainLen = FLOOR(tempCount*TrainingRate)
+                ELSE
+                  trainLen = tempCount - leaveOut
+                END IF
+
                 ALLOCATE(ptandPrcp(trainLen))
                 ALLOCATE(ptor1Prcp(trainLen))
                 ALLOCATE(ptor2Prcp(trainLen))
@@ -847,7 +853,13 @@
 
           !print *,"重新调整ptand，ptor1，ptor2数据"
           saveTrainLen = FLOOR(tempCount*1.0)
-          trainLen = FLOOR(tempCount*TrainingRate)
+          !设置trainLen的长度
+          IF (leaveOut < 0) THEN
+            trainLen = FLOOR(tempCount*TrainingRate)
+          ELSE
+            trainLen = tempCount - leaveOut
+          END IF
+          
           ALLOCATE(ptandPrcp(saveTrainLen))
           ALLOCATE(ptor1Prcp(saveTrainLen))
           ptandPrcp = savePtand1PrcpModify(CIL(1:saveTrainLen))
@@ -1014,7 +1026,13 @@
 
           !print *,"重新调整ptand，ptor1，ptor2数据"
           saveTrainLen = FLOOR(tempCount*1.0)
-          trainLen = FLOOR(tempCount*TrainingRate)
+          !设置trainLen的长度
+          IF (leaveOut < 0) THEN
+            trainLen = FLOOR(tempCount*TrainingRate)
+          ELSE
+            trainLen = tempCount - leaveOut
+          END IF
+          
           ALLOCATE(ptandPrcp(saveTrainLen))
           ALLOCATE(ptor1Prcp(saveTrainLen))
           ALLOCATE(ptor2Prcp(saveTrainLen))
@@ -1214,7 +1232,13 @@
 
           !print *,"重新调整ptand，ptor1，ptor2数据"
           saveTrainLen = FLOOR(tempCount*1.0)
-          trainLen = FLOOR(tempCount*TrainingRate)
+          !设置trainLen的长度
+          IF (leaveOut < 0) THEN
+            trainLen = FLOOR(tempCount*TrainingRate)
+          ELSE
+            trainLen = tempCount - leaveOut
+          END IF
+          
           ALLOCATE(ptandPrcp(saveTrainLen))
           ALLOCATE(ptor1Prcp(saveTrainLen))
           ptandPrcp = savePtand1PrcpModify(CIL(1:saveTrainLen))
@@ -1382,7 +1406,13 @@
 
           !print *,"重新调整ptand，ptor1，ptor2数据"
           saveTrainLen = FLOOR(tempCount*1.0)
-          trainLen = FLOOR(tempCount*TrainingRate)
+          !设置trainLen的长度
+          IF (leaveOut < 0) THEN
+            trainLen = FLOOR(tempCount*TrainingRate)
+          ELSE
+            trainLen = tempCount - leaveOut
+          END IF
+          
           ALLOCATE(ptandPrcp(saveTrainLen))
           ALLOCATE(ptor1Prcp(saveTrainLen))
           ALLOCATE(ptor2Prcp(saveTrainLen))
@@ -1570,7 +1600,13 @@
 
           !print *,"重新调整ptand，ptor1，ptor2数据"
           saveTrainLen = FLOOR(tempCount*1.0)
-          trainLen = FLOOR(tempCount*TrainingRate)
+          !设置trainLen的长度
+          IF (leaveOut < 0) THEN
+            trainLen = FLOOR(tempCount*TrainingRate)
+          ELSE
+            trainLen = tempCount - leaveOut
+          END IF
+          
           ALLOCATE(ptandPrcp(saveTrainLen))
           ALLOCATE(ptor1Prcp(saveTrainLen))
           ptandPrcp = savePtand1PrcpModify(CIL(1:saveTrainLen))
@@ -1743,7 +1779,13 @@
 
           !print *,"重新调整ptand，ptor1，ptor2数据"
           saveTrainLen = FLOOR(tempCount*1.0)
-          trainLen = FLOOR(tempCount*TrainingRate)
+          !设置trainLen的长度
+          IF (leaveOut < 0) THEN
+            trainLen = FLOOR(tempCount*TrainingRate)
+          ELSE
+            trainLen = tempCount - leaveOut
+          END IF
+          
           ALLOCATE(ptandPrcp(saveTrainLen))
           ALLOCATE(ptor1Prcp(saveTrainLen))
           ALLOCATE(ptor2Prcp(saveTrainLen))
