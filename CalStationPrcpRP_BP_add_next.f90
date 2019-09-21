@@ -99,7 +99,7 @@
   REAL(KIND = 8), ALLOCATABLE :: StationCodesUnique(:)            !GhcnPrcp中Codes编号
   REAL(KIND = 8), ALLOCATABLE :: RealArrayTemp2D(:,:)             !读取GhcnPrcp站点数据的临时数据库
   REAL(KIND = 8), ALLOCATABLE :: GhcnPrcpStandardDB(:,:)          !GhcnPrcp存放格式标准化数据库
-  REAL, ALLOCATABLE :: P(:,:),R(:,:),TempR(:,:),TempP(:,:),R2Count(:,:)        ! 预报每一个站点时，P\R信息
+  REAL, ALLOCATABLE :: P(:,:),R(:,:),TempR2(:,:),TempP(:,:),R2OneMonth(:,:)        ! 预报每一个站点时，P\R信息
 
   REAL(KIND = 8), ALLOCATABLE :: ptor2k(:,:), ptor2b(:,:)
   REAL(KIND = 8) :: ptor1k, ptor1b, tempPtor2k, tempPtor2b
@@ -458,10 +458,10 @@
   ALLOCATE(StudyPrcp(YearLen*MonthNum))
   ALLOCATE(FactorPrcp(YearLen*MonthNum))
   ALLOCATE(R(ValidStationNum*MonthNum,AheadMonthNum))
-  ALLOCATE(TempR(ValidStationNum*MonthNum,AheadMonthNum))
+  ALLOCATE(TempR2(ValidStationNum*MonthNum,AheadMonthNum))
   ALLOCATE(P(ValidStationNum*MonthNum,AheadMonthNum))
   ALLOCATE(TempP(ValidStationNum*MonthNum,AheadMonthNum))
-  ALLOCATE(R2Count(ValidStationNum*MonthNum,AheadMonthNum))
+  ALLOCATE(R2OneMonth(ValidStationNum,AheadMonthNum))
   ALLOCATE(ptor2k(ValidStationNum*MonthNum,AheadMonthNum))
   ALLOCATE(ptor2b(ValidStationNum*MonthNum,AheadMonthNum))
   !查询结果保存目录是否存在
@@ -766,20 +766,20 @@
     !print *,"保存P<0.1结果"
 
     PPvalue = 0.1
-    TempR = R**2
+    TempR2 = R**2
     !TempP = P
     WHERE(P >= PPvalue)   !删除显著水平低于0.1的值
-      TempR = 0
+      TempR2 = 0
     END WHERE
 
     WHERE(P == DataNumNotEnough)   !R .EQ. NaN
-      TempR = DataNumNotEnough
+      TempR2 = DataNumNotEnough
     END WHERE
-    !WHERE(TempR == R_Inf)   !R .EQ. Inf
-    !  TempR = 0
+    !WHERE(TempR2 == R_Inf)   !R .EQ. Inf
+    !  TempR2 = 0
     !END WHERE
     !WHERE(TempP == P_Inf)   !R .EQ. Infinity
-    !  TempR = 0
+    !  TempR2 = 0
     !END WHERE
     OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.1.dat',IOSTAT = iosval)
     DO ii = 1,MonthNum
@@ -805,8 +805,9 @@
       !pause
 
       DO jj = 1,saveRankNum
-        maxR2 = MAXVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-        CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+        R2OneMonth = TempR2(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:)
+        maxR2 = MAXVAL(R2OneMonth)
+        CodesIndexLocation = MAXLOC(R2OneMonth)
         IF (Rtandtor1 < -1) THEN
           WRITE(fileID,'(I15,I10,2F6.2,2F15.4,I15,I10,2F15.4,3F10.2)')INT(pstor1ID,KIND=8),INT(pstor1LM),R2tandtor1,Rtandtor1,DataNumNotEnough,DataNumNotEnough, &
             CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),&
@@ -898,8 +899,8 @@
             R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
             P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
 
-          IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
-            TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
+          IF (TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
+            TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
           END IF
 
           !print *,"保存完成"
@@ -1068,8 +1069,8 @@
             R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
             P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
 
-          IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
-            TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
+          IF (TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
+            TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
           END IF
 
           !print *,"保存完成"
@@ -1133,18 +1134,18 @@
 
     ! 保存前15名,P<0.05
     PPvalue = 0.05
-    TempR = R**2
+    TempR2 = R**2
     WHERE(P >= PPvalue)   !删除显著水平低于0.05的值
-      TempR = 0
+      TempR2 = 0
     END WHERE
     WHERE(P == DataNumNotEnough)   !R .EQ. NaN
-      TempR = DataNumNotEnough
+      TempR2 = DataNumNotEnough
     END WHERE
-    !WHERE(TempR == R_Inf)   !
-    !  TempR = 0
+    !WHERE(TempR2 == R_Inf)   !
+    !  TempR2 = 0
     !END WHERE
     !WHERE(TempP == P_Inf)   !
-    !  TempR = 0
+    !  TempR2 = 0
     !END WHERE
     OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.05.dat',IOSTAT = iosval)
     DO ii = 1,MonthNum
@@ -1171,8 +1172,9 @@
       !pause
 
       DO jj = 1,saveRankNum
-        maxR2 = MAXVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-        CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
+        R2OneMonth = TempR2(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:)
+        maxR2 = MAXVAL(R2OneMonth)
+        CodesIndexLocation = MAXLOC(R2OneMonth)
         IF (Rtandtor1 < -1) THEN
           WRITE(fileID,'(I15,I10,2F6.2,2F15.4,I15,I10,2F15.4,3F10.2)')INT(pstor1ID,KIND=8),INT(pstor1LM),R2tandtor1,Rtandtor1,DataNumNotEnough,DataNumNotEnough, &
             CodesIndex(CodesIndexLocation(1)),CodesIndexLocation(2),&
@@ -1264,8 +1266,8 @@
             R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
             P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
 
-          IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
-            TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
+          IF (TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
+            TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
           END IF
 
           !print *,"保存完成"
@@ -1435,8 +1437,8 @@
             R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
             P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
 
-          IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
-            TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
+          IF (TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
+            TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
           END IF
 
           !保存预测变量
@@ -1487,18 +1489,18 @@
 
     ! 保存前15名,P<0.01
     PPvalue = 0.01
-    TempR = R**2
+    TempR2 = R**2
     WHERE(P >= PPvalue)   !删除显著水平低于0.05的值
-      TempR = 0
+      TempR2 = 0
     END WHERE
     WHERE(P == DataNumNotEnough)   !R .EQ. NaN
-      TempR = DataNumNotEnough
+      TempR2 = DataNumNotEnough
     END WHERE
-    !WHERE(TempR == R_Inf)   !R .EQ. NaN
-    !  TempR = 0
+    !WHERE(TempR2 == R_Inf)   !R .EQ. NaN
+    !  TempR2 = 0
     !END WHERE
     !WHERE(TempP == P_Inf)   !R .EQ. Infinity
-    !  TempR = 0
+    !  TempR2 = 0
     !END WHERE
     OPEN(fileID,FILE = 'R_RankNum15_P.LT.0.01.dat',IOSTAT = iosval)
     DO ii = 1,MonthNum
@@ -1525,10 +1527,9 @@
       !pause
 
       DO jj = 1,saveRankNum
-        maxR2 = MAXVAL(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-        CodesIndexLocation = MAXLOC(TempR(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:))
-        !print *,CodesIndexLocation
-        !pause
+        R2OneMonth = TempR2(1+(ii-1)*ValidStationNum:ii*ValidStationNum,:)
+        maxR2 = MAXVAL(R2OneMonth)
+        CodesIndexLocation = MAXLOC(R2OneMonth)
 
         IF (Rtandtor1 < -1) THEN
           WRITE(fileID,'(I15,I10,2F6.2,2F15.4,I15,I10,2F15.4,3F10.2)')INT(pstor1ID,KIND=8),INT(pstor1LM),R2tandtor1,Rtandtor1,DataNumNotEnough,DataNumNotEnough, &
@@ -1621,8 +1622,8 @@
             R(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)),&
             P(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2))
 
-          IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
-            TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
+          IF (TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
+            TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
           END IF
 
           !print *,"保存完成"
@@ -1805,8 +1806,8 @@
           
           !pause
 
-          IF (TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
-            TempR(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
+          IF (TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) /= DataNumNotEnough) THEN
+            TempR2(CodesIndexLocation(1)+(ii-1)*ValidStationNum,CodesIndexLocation(2)) = 0
           END IF
 
           !保存预测变量
