@@ -585,9 +585,7 @@
     !预报量站点降雨数据
     !需要首先确定预报量站点数据在什么位置
     DO tempNum = 1,ValidStationNum
-      IF (GhcnPrcpStandardDB(tempNum,1) == pstandID) THEN
-        EXIT
-      END IF
+      IF (GhcnPrcpStandardDB(tempNum,1) == pstandID) EXIT
     END DO
     StudyPrcp = GhcnPrcpStandardDB(tempNum,2:)
     !print *,tempNum,"=======",pstandID,GhcnPrcpStandardDB(tempNum,1)
