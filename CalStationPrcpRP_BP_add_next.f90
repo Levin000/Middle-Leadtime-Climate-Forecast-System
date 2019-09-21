@@ -558,7 +558,7 @@
           pstor1LM = P_R_001RankData_Predictable( (i-1)*MonthNum*RankNum + (pTandMonth-1)*RankNum + 1,4)
           R2tandtor1 = P_R_001RankData_Predictable( (i-1)*MonthNum*RankNum + (pTandMonth-1)*RankNum + 1,5)
           Rtandtor1 = P_R_001RankData_Predictable( (i-1)*MonthNum*RankNum + (pTandMonth-1)*RankNum + 1,6)
-          IF (((pstor1ID == pstor2ID) .AND. (K == INT(pstor2LM))) .OR. (Rtandtor1 < -1)) THEN
+          IF (((pstor1ID == pstor2ID) .AND. ((pstor1LM == pstor2LM))) .OR. (Rtandtor1 < -1)) THEN
             !空白行，当第一个因子站点号与lead time与第二个因子相同时执行，或者第一个因子的相关系数为-9时执行
           ELSE
 
