@@ -1,111 +1,440 @@
-MODULE arraySortModule
+MODULE ArraySortModule
   IMPLICIT NONE
+  INTERFACE shell_sort
+    module procedure shell_sort_int
+    module procedure shell_sort_real
+    module procedure shell_sort_int_l
+    module procedure shell_sort_real_d
+  end interface
+  INTERFACE bubble_sort
+    module procedure bubble_sort_int
+    module procedure bubble_sort_real
+    module procedure bubble_sort_int_l
+    module procedure bubble_sort_real_d
+  end interface
+  INTERFACE quick_sort
+    module procedure quick_sort_int
+    module procedure quick_sort_real
+    module procedure quick_sort_int_l
+    module procedure quick_sort_real_d
+  end interface
+  
   PUBLIC :: shell_sort,bubble_sort
   PRIVATE :: quick_sort
 CONTAINS
   !****************************************************************************
-  !
-  !  SUBROUTINE: Shell_Sort(array,n)
-  !  PURPOSE:  sort the array
-  !
+  !  subroutine: shell_sort_int(array,n), deal with integer 4bytes type array
+  !  purpose:  sort the array by shell sort method
+  !  parameters:
+  !      a is the array which will be sorted
   !****************************************************************************
-  SUBROUTINE shell_sort(a,n)
-    IMPLICIT NONE
-    INTEGER :: n ! 传入数组的大小
-    INTEGER i,j       ! 循环计数器
-    INTEGER k         ! k 值
-    REAL(KIND = 8) :: a(n)   !传入的数组
-    REAL(KIND = 8) :: temp   !交换变量
-    k=n/2             ! k 的初值
-    DO WHILE( k>0 )
-      DO i=k+1,n
+  SUBROUTINE shell_sort_int(a)
+    implicit none
+    integer :: n
+    integer i,j
+    integer k
+    integer :: a(:)
+    integer :: temp
+    ! get the size of array
+    n = size(a)
+    k=n/2
+    do while( k>0 )
+      do i=k+1,n
         j=i-k
-        DO WHILE( j>0 )
-          ! 如果a(j)>a(j+k),要交换它们的数值,并往回取出
-          ! a(j-k)\a(j)为新的一组来比较。
-          IF ( a(j) .gt. a(j+k) ) THEN
+        do while( j>0 )
+          if ( a(j) .gt. a(j+k) ) then
             temp=a(j)
             a(j)=a(j+k)
             a(j+k)=temp
             j=j-k
-          ELSE
-            EXIT ! a(j)<a(j+k)时可跳出循环
-          END IF
-        END DO
-      END DO
-      k=k/2 ! 设定新的k值
-    END DO
-    RETURN
-  END SUBROUTINE shell_sort
+          else
+            exit 
+          end if
+        end do
+      end do
+      k=k/2
+    end do
+    return
+  end subroutine shell_sort_int
   !****************************************************************************
-  !
-  !  SUBROUTINE: Bubble_Sort(array,n)
-  !  PURPOSE:  sort the array
-  !
+  !  subroutine: shell_sort_real(array,n), deal with real 4bytes type array
+  !  purpose:  sort the array by shell sort method
+  !  parameters:
+  !      a is the array which will be sorted
   !****************************************************************************
-  SUBROUTINE bubble_sort(a,n)
-    IMPLICIT NONE
-    INTEGER :: n
-    INTEGER :: i,j
-    REAL(KIND = 8) :: a(n),temp
-    DO i=n-1,1,-1   ! 开始做n-1次的扫瞄  1,n=1
-      DO j=1,i      ! 一对一对的来比较，i之后的数字不用比较 1,n-i
-        IF ( a(j) > a(j+1) ) THEN  ! 如果a(j) > a(j+1) 就把这两个数值交换
+  SUBROUTINE shell_sort_real(a)
+    implicit none
+    integer :: n
+    integer i,j
+    integer k
+    real :: a(:)
+    real :: temp
+    ! get the size of array
+    n = size(a)
+    k=n/2
+    do while( k>0 )
+      do i=k+1,n
+        j=i-k
+        do while( j>0 )
+          if ( a(j) .gt. a(j+k) ) then
+            temp=a(j)
+            a(j)=a(j+k)
+            a(j+k)=temp
+            j=j-k
+          else
+            exit 
+          end if
+        end do
+      end do
+      k=k/2
+    end do
+    return
+  end subroutine shell_sort_real
+  !****************************************************************************
+  !  subroutine: shell_sort_int_l(array,n), deal with integer 8bytes type array
+  !  purpose:  sort the array by shell sort method
+  !  parameters:
+  !      a is the array which will be sorted
+  !****************************************************************************
+  SUBROUTINE shell_sort_int_l(a)
+    implicit none
+    integer :: n
+    integer i,j
+    integer k
+    integer(kind = 8) :: a(:)
+    integer(kind = 8) :: temp
+    ! get the size of array
+    n = size(a)
+    k=n/2
+    do while( k>0 )
+      do i=k+1,n
+        j=i-k
+        do while( j>0 )
+          if ( a(j) .gt. a(j+k) ) then
+            temp=a(j)
+            a(j)=a(j+k)
+            a(j+k)=temp
+            j=j-k
+          else
+            exit 
+          end if
+        end do
+      end do
+      k=k/2
+    end do
+    return
+  end subroutine shell_sort_int_l
+  !****************************************************************************
+  !  subroutine: shell_sort_real_d(array,n), deal with real 8bytes type array
+  !  purpose:  sort the array by shell sort method
+  !  parameters:
+  !      a is the array which will be sorted
+  !****************************************************************************
+  SUBROUTINE shell_sort_real_d(a)
+    implicit none
+    integer :: n
+    integer i,j
+    integer k
+    real(kind = 8) :: a(:)
+    real(kind = 8) :: temp
+    ! get the size of array
+    n = size(a)
+    k=n/2
+    do while( k>0 )
+      do i=k+1,n
+        j=i-k
+        do while( j>0 )
+          if ( a(j) .gt. a(j+k) ) then
+            temp=a(j)
+            a(j)=a(j+k)
+            a(j+k)=temp
+            j=j-k
+          else
+            exit 
+          end if
+        end do
+      end do
+      k=k/2
+    end do
+    return
+  end subroutine shell_sort_real_d
+ 
+  !****************************************************************************
+  !  subroutine: bubble_sort_int(array,n), deal with integer 4bytes type array
+  !  purpose:  sort the array
+  !  parameters:
+  !      a is the array which will be sorted
+  !****************************************************************************
+  SUBROUTINE bubble_sort_int(a)
+    implicit none
+    integer :: n
+    integer :: i,j
+    integer :: a(:)
+    integer :: temp
+    
+    ! get the size of array
+    n = size(a)
+    
+    do i=n-1,1,-1
+      do j=1,i
+        if ( a(j) > a(j+1) ) then
           temp=a(j)
           a(j)=a(j+1)
           a(j+1)=temp
-        END IF
-      END DO
-    END DO
-    RETURN
-  END SUBROUTINE bubble_sort
+        end if
+      end do
+    end do
+    return
+  end subroutine bubble_sort_int
+  
   !****************************************************************************
-  !
-  !  SUBROUTINE: Quick_Sort(InputArray,N,S,E)
-  !  PURPOSE:  sort the array
-  !
+  !  subroutine: bubble_sort_real(array,n), deal with real 4bytes type array
+  !  purpose:  sort the array
+  !  parameters:
+  !      a is the array which will be sorted
   !****************************************************************************
-  RECURSIVE SUBROUTINE quick_sort(a,n,s,e)
-    IMPLICIT NONE
-    INTEGER :: n    ! 表示类型的大小
-    INTEGER :: s    ! 传入的参数, 这一组的类型起始位置
-    INTEGER :: e    ! 传入的参数, 这一组的类型结束位置
-    INTEGER :: l,r  ! 用来找a(l)>k及a(r)<k时用的
-    REAL(KIND = 8) :: a(n) ! 存放数据的类型
-    REAL(KIND = 8) :: k    ! 记录键值a(s)
-    REAL(KIND = 8) :: temp ! 交换两个数值时用的
-    ! 首先要先给定l,r的初值. l要从头开始,e则要从尾开始
+  SUBROUTINE bubble_sort_real(a)
+    implicit none
+    integer :: n
+    integer :: i,j
+    real :: a(:)
+    real :: temp
+    
+    ! get the size of array
+    n = size(a)
+    
+    do i=n-1,1,-1
+      do j=1,i
+        if ( a(j) > a(j+1) ) then
+          temp=a(j)
+          a(j)=a(j+1)
+          a(j+1)=temp
+        end if
+      end do
+    end do
+    return
+  end subroutine bubble_sort_real
+  !****************************************************************************
+  !  subroutine: bubble_sort_int_l(array,n), deal with integer 8bytes type array
+  !  purpose:  sort the array
+  !  parameters:
+  !      a is the array which will be sorted
+  !****************************************************************************
+  SUBROUTINE bubble_sort_int_l(a)
+    implicit none
+    integer :: n
+    integer :: i,j
+    integer(kind = 8) :: a(:)
+    integer(kind = 8) :: temp
+    
+    ! get the size of array
+    n = size(a)
+    
+    do i=n-1,1,-1
+      do j=1,i
+        if ( a(j) > a(j+1) ) then
+          temp=a(j)
+          a(j)=a(j+1)
+          a(j+1)=temp
+        end if
+      end do
+    end do
+    return
+  end subroutine bubble_sort_int_l
+  
+  !****************************************************************************
+  !  subroutine: bubble_sort_real_d(array,n), deal with real 8bytes type array
+  !  purpose:  sort the array
+  !  parameters:
+  !      a is the array which will be sorted
+  !****************************************************************************
+  SUBROUTINE bubble_sort_real_d(a)
+    implicit none
+    integer :: n
+    integer :: i,j
+    real(kind = 8) :: a(:)
+    real(kind = 8) :: temp
+    
+    ! get the size of array
+    n = size(a)
+    
+    do i=n-1,1,-1
+      do j=1,i
+        if ( a(j) > a(j+1) ) then
+          temp=a(j)
+          a(j)=a(j+1)
+          a(j+1)=temp
+        end if
+      end do
+    end do
+    return
+  end subroutine bubble_sort_real_d
+  !****************************************************************************
+  !  subroutine: quick_sort_real_d(inputarray,n,s,e), deal with int 4bytes type array
+  !  purpose:  sort the array
+  !  parameters:
+  !      a is the array which will be sorted
+  !****************************************************************************
+  RECURSIVE SUBROUTINE quick_sort_int(a,s,e)
+    implicit none
+    integer :: n
+    integer :: s    ! 传入的参数, 这一组的类型起始位置
+    integer :: e    ! 传入的参数, 这一组的类型结束位置
+    integer :: l,r  
+    integer :: a(:) ! 存放数据的类型
+    integer :: k    ! 记录键值a(s)
+    integer :: temp ! 交换两个数值时用的
+    
+    n = size(a)
     l=s
     r=e+1
-    ! right值 > left值 时才有必要进行排序
-    IF ( r<=l ) RETURN
-    k=a(s)  ! 设定键值
-    DO WHILE(.true.)
-      ! 找出a(l)<k的所在
-      DO WHILE( .true. )
+    if ( r<=l ) return
+    k=a(s)  
+    do while(.true.)
+      do while( .true. )
         l=l+1
-        IF ( (a(l) > k) .or. (l>=e) ) EXIT
-      END DO
-      ! 找出a(r)>k的所在
-      DO WHILE( .true. )
+        if ( (a(l) > k) .or. (l>=e) ) exit
+      end do
+      do while( .true. )
         r=r-1
-        IF ( (a(r) < k) .or. (r<=s) ) EXIT
-      END DO
-      ! 如果right 跑到 left的左边时, 循环就该结束了
-      IF ( r <= l ) EXIT
-      ! 交换a(l),a(r)的数值
+        if ( (a(r) < k) .or. (r<=s) ) exit
+      end do
+      if ( r <= l ) exit
       temp=a(l)
       a(l)=a(r)
       a(r)=temp
-    END DO
-    ! 交换a(s),a(r)的数值
+    end do
     temp=a(s)
     a(s)=a(r)
     a(r)=temp
-    ! 把r之前的数据重新分组,再做排序
-    CALL quick_sort(a,n,s,r-1)
-    ! 把r之后的数据重新分组,再做排序
-    CALL quick_sort(a,n,r+1,e)
-    RETURN
-  END SUBROUTINE quick_sort
-END MODULE arraySortModule
+    call quick_sort_int(a,s,r-1)
+    call quick_sort_int(a,r+1,e)
+    return
+  end subroutine quick_sort_int
+  !****************************************************************************
+  !  subroutine: quick_sort_real_d(inputarray,n,s,e), deal with real 4bytes type array
+  !  purpose:  sort the array
+  !  parameters:
+  !      a is the array which will be sorted
+  !****************************************************************************
+  RECURSIVE SUBROUTINE quick_sort_real(a,s,e)
+    implicit none
+    integer :: n
+    integer :: s    ! 传入的参数, 这一组的类型起始位置
+    integer :: e    ! 传入的参数, 这一组的类型结束位置
+    integer :: l,r  
+    real :: a(:) ! 存放数据的类型
+    real :: k    ! 记录键值a(s)
+    real :: temp ! 交换两个数值时用的
+    
+    n = size(a)
+    l=s
+    r=e+1
+    if ( r<=l ) return
+    k=a(s)  
+    do while(.true.)
+      do while( .true. )
+        l=l+1
+        if ( (a(l) > k) .or. (l>=e) ) exit
+      end do
+      do while( .true. )
+        r=r-1
+        if ( (a(r) < k) .or. (r<=s) ) exit
+      end do
+      if ( r <= l ) exit
+      temp=a(l)
+      a(l)=a(r)
+      a(r)=temp
+    end do
+    temp=a(s)
+    a(s)=a(r)
+    a(r)=temp
+    call quick_sort_real(a,s,r-1)
+    call quick_sort_real(a,r+1,e)
+    return
+  end subroutine quick_sort_real
+  !****************************************************************************
+  !  subroutine: quick_sort_real_d(inputarray,n,s,e), deal with integer 8bytes type array
+  !  purpose:  sort the array
+  !  parameters:
+  !      a is the array which will be sorted
+  !****************************************************************************
+  RECURSIVE SUBROUTINE quick_sort_int_l(a,s,e)
+    implicit none
+    integer :: n
+    integer :: s    ! 传入的参数, 这一组的类型起始位置
+    integer :: e    ! 传入的参数, 这一组的类型结束位置
+    integer :: l,r  
+    integer(kind = 8) :: a(:) ! 存放数据的类型
+    integer(kind = 8) :: k    ! 记录键值a(s)
+    integer(kind = 8) :: temp ! 交换两个数值时用的
+    
+    n = size(a)
+    l=s
+    r=e+1
+    if ( r<=l ) return
+    k=a(s)  
+    do while(.true.)
+      do while( .true. )
+        l=l+1
+        if ( (a(l) > k) .or. (l>=e) ) exit
+      end do
+      do while( .true. )
+        r=r-1
+        if ( (a(r) < k) .or. (r<=s) ) exit
+      end do
+      if ( r <= l ) exit
+      temp=a(l)
+      a(l)=a(r)
+      a(r)=temp
+    end do
+    temp=a(s)
+    a(s)=a(r)
+    a(r)=temp
+    call quick_sort_int_l(a,s,r-1)
+    call quick_sort_int_l(a,r+1,e)
+    return
+  end subroutine quick_sort_int_l
+  !****************************************************************************
+  !  subroutine: quick_sort_real_d(inputarray,n,s,e), deal with real 8bytes type array
+  !  purpose:  sort the array
+  !  parameters:
+  !      a is the array which will be sorted
+  !****************************************************************************
+  RECURSIVE SUBROUTINE quick_sort_real_d(a,s,e)
+    implicit none
+    integer :: n
+    integer :: s    ! 传入的参数, 这一组的类型起始位置
+    integer :: e    ! 传入的参数, 这一组的类型结束位置
+    integer :: l,r  
+    real(kind = 8) :: a(:) ! 存放数据的类型
+    real(kind = 8) :: k    ! 记录键值a(s)
+    real(kind = 8) :: temp ! 交换两个数值时用的
+    
+    n = size(a)
+    l=s
+    r=e+1
+    if ( r<=l ) return
+    k=a(s)  
+    do while(.true.)
+      do while( .true. )
+        l=l+1
+        if ( (a(l) > k) .or. (l>=e) ) exit
+      end do
+      do while( .true. )
+        r=r-1
+        if ( (a(r) < k) .or. (r<=s) ) exit
+      end do
+      if ( r <= l ) exit
+      temp=a(l)
+      a(l)=a(r)
+      a(r)=temp
+    end do
+    temp=a(s)
+    a(s)=a(r)
+    a(r)=temp
+    call quick_sort_real_d(a,s,r-1)
+    call quick_sort_real_d(a,r+1,e)
+    return
+  end subroutine quick_sort_real_d
+END MODULE ArraySortModule
