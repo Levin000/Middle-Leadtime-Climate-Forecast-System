@@ -1,4 +1,6 @@
-# Middle Leadtime Climate Forecast System
+[![DOI](https://zenodo.org/badge/197750265.svg)](https://zenodo.org/badge/latestdoi/197750265)
+
+## Middle Leadtime Climate Forecast System
 
 - Notes: This is **nightly** branch! 
 
